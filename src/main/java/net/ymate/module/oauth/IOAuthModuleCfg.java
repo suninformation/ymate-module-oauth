@@ -32,7 +32,7 @@ public interface IOAuthModuleCfg {
     String getCacheNamePrefix();
 
     /**
-     * @return 用户确认授权视图文件路径, 默认值: _views/oauth2/sns-authorization
+     * @return 用户确认授权JSP视图文件路径, 默认值: _views/oauth2/sns-authorization
      */
     String getAuthorizationView();
 

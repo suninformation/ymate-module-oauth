@@ -22,6 +22,9 @@
     # 缓存名称前缀, 默认值: ""
     ymp.configs.module.oauth.cache_name_prefix=
     
+    # 用户确认授权JSP视图文件路径, 默认值: _views/oauth2/sns-authorization
+    ymp.configs.module.oauth.authorization_view=
+    
     # Token生成器接口实现, 默认值: net.ymate.module.oauth.impl.DefaultTokenGenerator
     ymp.configs.module.oauth.token_generator_class=
     

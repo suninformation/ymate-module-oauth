@@ -51,7 +51,7 @@ public class DefaultModuleCfg implements IOAuthModuleCfg {
         //
         __cacheNamePrefix = StringUtils.trimToEmpty(_moduleCfgs.get("cache_name_prefix"));
         //
-        __authorizationView = StringUtils.defaultIfBlank(_moduleCfgs.get("authorization_view"), "_views/oauth2/sns-authorize");
+        __authorizationView = StringUtils.defaultIfBlank(_moduleCfgs.get("authorization_view"), "_views/oauth2/sns-authorization");
         //
         __tokenGenerator = ClassUtils.impl(_moduleCfgs.get("token_generator_class"), IOAuthTokenGenerator.class, getClass());
         if (__tokenGenerator == null) {
@@ -72,7 +72,7 @@ public class DefaultModuleCfg implements IOAuthModuleCfg {
     }
 
     public String getAuthorizationView() {
-        return null;
+        return __authorizationView;
     }
 
     public IOAuthTokenGenerator getTokenGenerator() {
