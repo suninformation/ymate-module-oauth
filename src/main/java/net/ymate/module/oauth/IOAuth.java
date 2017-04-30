@@ -80,6 +80,8 @@ public interface IOAuth {
 
         public static final String INVALID_USER = "invalid_user";
 
+        public static final String INVALID_REDIRECT_URI = "invalid_redirect_uri";
+
         public static final String REDIRECT_URI_MISMATCH = "redirect_uri_mismatch";
     }
 

@@ -15,8 +15,8 @@
  */
 package net.ymate.module.oauth.intercept;
 
-import net.ymate.module.oauth.OAuth;
 import net.ymate.module.oauth.IOAuth;
+import net.ymate.module.oauth.OAuth;
 import net.ymate.platform.core.beans.intercept.IInterceptor;
 import net.ymate.platform.core.beans.intercept.InterceptContext;
 import net.ymate.platform.webmvc.context.WebContext;
@@ -42,11 +42,11 @@ public class SnsAccessTokenCheckInterceptor implements IInterceptor {
             case BEFORE:
                 try {
                     OAuthAccessResourceRequest _oauthRequest = new OAuthAccessResourceRequest(WebContext.getRequest(), ParameterStyle.QUERY);
-                    String _openId = WebContext.getRequest().getParameter("open_id");
+                    String _openId = WebContext.getRequest().getParameter(IOAuth.Const.OPEN_ID);
                     String _scope = context.getContextParams().get(org.apache.oltu.oauth2.common.OAuth.OAUTH_SCOPE);
                     OAuthResponse _response = null;
                     if (StringUtils.isBlank(_openId)) {
-                        _response = OAuthASResponse.errorResponse(HttpServletResponse.SC_UNAUTHORIZED).setError("invalid_open_id").buildJSONMessage();
+                        _response = OAuthASResponse.errorResponse(HttpServletResponse.SC_UNAUTHORIZED).setError(IOAuth.Const.INVALID_USER).buildJSONMessage();
                     } else {
                         IOAuth.IOAuthAccessResourceHelper _resourceHelper = OAuth.get().bindAccessResourceHelper(_oauthRequest.getAccessToken(), _openId);
                         if (!_resourceHelper.checkAccessToken()) {

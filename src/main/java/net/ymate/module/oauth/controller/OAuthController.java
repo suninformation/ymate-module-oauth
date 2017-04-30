@@ -137,7 +137,7 @@ public class OAuthController {
             ResponseType _responseType = ResponseType.valueOf(StringUtils.upperCase(_oauthRequest.getParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_RESPONSE_TYPE)));
             String _redirectURI = _oauthRequest.getParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_REDIRECT_URI);
             if (StringUtils.isBlank(_redirectURI)) {
-                _response = __responseBadRequest("invalid_" + org.apache.oltu.oauth2.common.OAuth.OAUTH_REDIRECT_URI);
+                _response = __responseBadRequest(IOAuth.Const.INVALID_REDIRECT_URI);
             } else {
                 String _uid = UserSessionBean.current().getUid();
                 IOAuth.IOAuthAuthzHelper _authzHelper = OAuth.get().bindAuthzHelper(_oauthRequest.getClientId(), _uid);
