@@ -13,12 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*
- * Copyright (c) 2007-2017, the original author or authors. All rights reserved.
- *
- * This program licensed under the terms of the GNU Lesser General Public License version 3.0
- * as published by the Free Software Foundation.
- */
 package net.ymate.module.oauth.impl;
 
 import net.ymate.module.oauth.IOAuthTokenGenerator;

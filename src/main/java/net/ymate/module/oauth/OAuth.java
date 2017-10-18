@@ -15,6 +15,7 @@
  */
 package net.ymate.module.oauth;
 
+import net.ymate.module.oauth.controller.OAuthSnsController;
 import net.ymate.module.oauth.impl.DefaultModuleCfg;
 import net.ymate.platform.core.Version;
 import net.ymate.platform.core.YMP;
@@ -23,6 +24,7 @@ import net.ymate.platform.core.module.IModule;
 import net.ymate.platform.core.module.annotation.Module;
 import net.ymate.platform.core.util.DateTimeUtils;
 import net.ymate.platform.core.util.RuntimeUtils;
+import net.ymate.platform.webmvc.WebMVC;
 import org.apache.commons.lang.NullArgumentException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -70,8 +72,12 @@ public class OAuth implements IModule, IOAuth {
             __owner = owner;
             __moduleCfg = new DefaultModuleCfg(owner);
             __moduleCfg.getTokenStorageAdapter().init(this);
-            if (__moduleCfg.getUserInfoAdapter() != null) {
-                __moduleCfg.getUserInfoAdapter().init(this);
+            //
+            if (__moduleCfg.isSnsEnabled()) {
+                WebMVC.get().registerController(OAuthSnsController.class);
+                if (__moduleCfg.getUserInfoAdapter() != null) {
+                    __moduleCfg.getUserInfoAdapter().init(this);
+                }
             }
             //
             __inited = true;
@@ -85,7 +91,7 @@ public class OAuth implements IModule, IOAuth {
     public void destroy() throws Exception {
         if (__inited) {
             __inited = false;
-            if (__moduleCfg.getUserInfoAdapter() != null) {
+            if (__moduleCfg.isSnsEnabled() && __moduleCfg.getUserInfoAdapter() != null) {
                 __moduleCfg.getUserInfoAdapter().destroy();
             }
             __moduleCfg.getTokenStorageAdapter().destroy();
@@ -103,7 +109,7 @@ public class OAuth implements IModule, IOAuth {
         return __moduleCfg;
     }
 
-    public IOAuthClientHelper bindClientHelper(final String clientId, final String clientSecret) throws Exception {
+    public IOAuthClientHelper clientHelper(final String clientId, final String clientSecret) throws Exception {
         if (StringUtils.isBlank(clientId)) {
             throw new NullArgumentException("clientId");
         }
@@ -138,7 +144,7 @@ public class OAuth implements IModule, IOAuth {
 
     //
 
-    public IOAuthAuthzHelper bindAuthzHelper(final String clientId, final String uid) throws Exception {
+    public IOAuthAuthzHelper authzHelper(final String clientId, final String uid) throws Exception {
         return new IOAuthAuthzHelper() {
 
             private OAuthClient _clientVO = __moduleCfg.getTokenStorageAdapter().findClientById(clientId);
@@ -172,7 +178,7 @@ public class OAuth implements IModule, IOAuth {
 
     //
 
-    public IOAuthTokenHelper bindTokenHelper(final String clientId, final String clientSecret, final String code) throws Exception {
+    public IOAuthTokenHelper tokenHelper(final String clientId, final String clientSecret, final String code) throws Exception {
         if (StringUtils.isBlank(clientId)) {
             throw new NullArgumentException("clientId");
         }
@@ -242,7 +248,7 @@ public class OAuth implements IModule, IOAuth {
         };
     }
 
-    public IOAuthTokenHelper bindTokenHelper(final String clientId, final String clientSecret, final String scope, final String username, final String passwd) throws Exception {
+    public IOAuthTokenHelper tokenHelper(final String clientId, final String clientSecret, final String scope, final String username, final String passwd) throws Exception {
         if (StringUtils.isBlank(clientId)) {
             throw new NullArgumentException("clientId");
         }
@@ -325,7 +331,7 @@ public class OAuth implements IModule, IOAuth {
         };
     }
 
-    public IOAuthTokenHelper bindTokenHelper(final String clientId, final String refreshToken) throws Exception {
+    public IOAuthTokenHelper tokenHelper(final String clientId, final String refreshToken) throws Exception {
         if (StringUtils.isBlank(clientId)) {
             throw new NullArgumentException("clientId");
         }
@@ -409,7 +415,7 @@ public class OAuth implements IModule, IOAuth {
 
     //
 
-    public IOAuthAccessResourceHelper bindAccessResourceHelper(final String accessToken) throws Exception {
+    public IOAuthAccessResourceHelper resourceHelper(final String accessToken) throws Exception {
         return new IOAuthAccessResourceHelper() {
 
             private OAuthClient _clientVO = __moduleCfg.getTokenStorageAdapter().findClientByAccessToken(accessToken);
@@ -436,7 +442,7 @@ public class OAuth implements IModule, IOAuth {
         };
     }
 
-    public IOAuthAccessResourceHelper bindAccessResourceHelper(final String accessToken, final String openId) throws Exception {
+    public IOAuthAccessResourceHelper resourceHelper(final String accessToken, final String openId) throws Exception {
         return new IOAuthAccessResourceHelper() {
 
             private OAuthClientUser _clientUserVO = __moduleCfg.getTokenStorageAdapter().findUserByAccessToken(accessToken);

@@ -32,6 +32,11 @@ public interface IOAuthModuleCfg {
     String getCacheNamePrefix();
 
     /**
+     * @return 是否开启SNS用户网页授权服务, 默认值: false
+     */
+    boolean isSnsEnabled();
+
+    /**
      * @return 用户确认授权JSP视图文件路径, 默认值: _views/oauth2/sns-authorization
      */
     String getAuthorizationView();

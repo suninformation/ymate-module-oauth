@@ -33,6 +33,8 @@ public class DefaultModuleCfg implements IOAuthModuleCfg {
 
     private String __cacheNamePrefix;
 
+    private boolean __snsEnabled;
+
     private String __authorizationView;
 
     private IOAuthTokenGenerator __tokenGenerator;
@@ -51,14 +53,16 @@ public class DefaultModuleCfg implements IOAuthModuleCfg {
         //
         __cacheNamePrefix = StringUtils.trimToEmpty(_moduleCfgs.get("cache_name_prefix"));
         //
-        __authorizationView = StringUtils.defaultIfBlank(_moduleCfgs.get("authorization_view"), "_views/oauth2/sns-authorization");
+        __snsEnabled = BlurObject.bind(_moduleCfgs.get("sns_enabled")).toBooleanValue();
+        if (__snsEnabled) {
+            __authorizationView = StringUtils.defaultIfBlank(_moduleCfgs.get("authorization_view"), "_views/oauth2/sns-authorization");
+            __userInfoAdaptor = ClassUtils.impl(_moduleCfgs.get("userinfo_adapter_class"), IOAuthUserInfoAdapter.class, getClass());
+        }
         //
         __tokenGenerator = ClassUtils.impl(_moduleCfgs.get("token_generator_class"), IOAuthTokenGenerator.class, getClass());
         if (__tokenGenerator == null) {
             __tokenGenerator = new DefaultTokenGenerator();
         }
-        //
-        __userInfoAdaptor = ClassUtils.impl(_moduleCfgs.get("userinfo_adapter_class"), IOAuthUserInfoAdapter.class, getClass());
         //
         __storageAdapter = ClassUtils.impl(_moduleCfgs.get("storage_adapter_class"), IOAuthStorageAdapter.class, getClass());
     }
@@ -69,6 +73,10 @@ public class DefaultModuleCfg implements IOAuthModuleCfg {
 
     public String getCacheNamePrefix() {
         return __cacheNamePrefix;
+    }
+
+    public boolean isSnsEnabled() {
+        return __snsEnabled;
     }
 
     public String getAuthorizationView() {

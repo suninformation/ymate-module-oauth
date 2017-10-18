@@ -41,19 +41,19 @@ public interface IOAuth {
      */
     boolean isInited();
 
-    IOAuthClientHelper bindClientHelper(String clientId, String clientSecret) throws Exception;
+    IOAuthClientHelper clientHelper(String clientId, String clientSecret) throws Exception;
 
-    IOAuthAuthzHelper bindAuthzHelper(String clientId, String uid) throws Exception;
+    IOAuthAuthzHelper authzHelper(String clientId, String uid) throws Exception;
 
-    IOAuthTokenHelper bindTokenHelper(String clientId, String clientSecret, String code) throws Exception;
+    IOAuthTokenHelper tokenHelper(String clientId, String clientSecret, String code) throws Exception;
 
-    IOAuthTokenHelper bindTokenHelper(String clientId, String clientSecret, String scope, String username, String passwd) throws Exception;
+    IOAuthTokenHelper tokenHelper(String clientId, String clientSecret, String scope, String username, String passwd) throws Exception;
 
-    IOAuthTokenHelper bindTokenHelper(String clientId, String refreshToken) throws Exception;
+    IOAuthTokenHelper tokenHelper(String clientId, String refreshToken) throws Exception;
 
-    IOAuthAccessResourceHelper bindAccessResourceHelper(String accessToken) throws Exception;
+    IOAuthAccessResourceHelper resourceHelper(String accessToken) throws Exception;
 
-    IOAuthAccessResourceHelper bindAccessResourceHelper(String accessToken, String openId) throws Exception;
+    IOAuthAccessResourceHelper resourceHelper(String accessToken, String openId) throws Exception;
 
     /**
      * OAuth授权作用域

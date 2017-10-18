@@ -15,20 +15,18 @@
  */
 package net.ymate.module.oauth.intercept;
 
-import net.ymate.module.oauth.OAuth;
 import net.ymate.module.oauth.IOAuth;
+import net.ymate.module.oauth.OAuth;
+import net.ymate.module.oauth.support.OAuthResponseUtils;
 import net.ymate.platform.core.beans.intercept.IInterceptor;
 import net.ymate.platform.core.beans.intercept.InterceptContext;
 import net.ymate.platform.webmvc.context.WebContext;
 import net.ymate.platform.webmvc.view.impl.HttpStatusView;
-import org.apache.oltu.oauth2.as.response.OAuthASResponse;
 import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 import org.apache.oltu.oauth2.common.message.types.ParameterStyle;
 import org.apache.oltu.oauth2.rs.request.OAuthAccessResourceRequest;
-
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author 刘镇 (suninformation@163.com) on 17/3/13 上午2:22
@@ -41,21 +39,18 @@ public class ClientAccessTokenCheckInterceptor implements IInterceptor {
             case BEFORE:
                 try {
                     OAuthAccessResourceRequest _oauthRequest = new OAuthAccessResourceRequest(WebContext.getRequest(), ParameterStyle.QUERY);
-                    IOAuth.IOAuthAccessResourceHelper _resourceHelper = OAuth.get().bindAccessResourceHelper(_oauthRequest.getAccessToken());
+                    IOAuth.IOAuthAccessResourceHelper _resourceHelper = OAuth.get().resourceHelper(_oauthRequest.getAccessToken());
                     OAuthResponse _response = null;
                     if (!_resourceHelper.checkAccessToken()) {
-                        _response = OAuthASResponse.errorResponse(HttpServletResponse.SC_UNAUTHORIZED).setError(OAuthError.ResourceResponse.INVALID_TOKEN).buildJSONMessage();
+                        _response = OAuthResponseUtils.unauthorizedClient(OAuthError.ResourceResponse.INVALID_TOKEN);
                     } else if (_resourceHelper.isExpiredAccessToken()) {
-                        _response = OAuthASResponse.errorResponse(HttpServletResponse.SC_UNAUTHORIZED).setError(OAuthError.ResourceResponse.EXPIRED_TOKEN).buildJSONMessage();
+                        _response = OAuthResponseUtils.unauthorizedClient(OAuthError.ResourceResponse.EXPIRED_TOKEN);
                     }
                     if (_response != null) {
                         return new HttpStatusView(_response.getResponseStatus(), false).writeBody(_response.getBody());
                     }
                 } catch (OAuthProblemException e) {
-                    OAuthResponse _response = OAuthASResponse
-                            .errorResponse(HttpServletResponse.SC_BAD_REQUEST)
-                            .error(e)
-                            .buildJSONMessage();
+                    OAuthResponse _response = OAuthResponseUtils.badRequestError(e);
                     return new HttpStatusView(_response.getResponseStatus(), false).writeBody(_response.getBody());
                 }
         }
