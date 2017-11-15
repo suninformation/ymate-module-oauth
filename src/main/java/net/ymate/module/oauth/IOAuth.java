@@ -47,6 +47,8 @@ public interface IOAuth {
 
     IOAuthTokenHelper tokenHelper(String clientId, String clientSecret, String code) throws Exception;
 
+    IOAuthTokenHelper tokenHelper(String clientId, String clientSecret, String scope, String uid) throws Exception;
+
     IOAuthTokenHelper tokenHelper(String clientId, String clientSecret, String scope, String username, String passwd) throws Exception;
 
     IOAuthTokenHelper tokenHelper(String clientId, String refreshToken) throws Exception;

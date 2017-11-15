@@ -248,6 +248,79 @@ public class OAuth implements IModule, IOAuth {
         };
     }
 
+    @Override
+    public IOAuthTokenHelper tokenHelper(final String clientId, final String clientSecret, final String scope, final String uid) throws Exception {
+        if (StringUtils.isBlank(clientId)) {
+            throw new NullArgumentException("clientId");
+        }
+        if (StringUtils.isBlank(clientSecret)) {
+            throw new NullArgumentException("clientSecret");
+        }
+        if (StringUtils.isBlank(scope)) {
+            throw new NullArgumentException("scope");
+        }
+        if (StringUtils.isBlank(uid)) {
+            throw new NullArgumentException("uid");
+        }
+        //
+        return new IOAuthTokenHelper() {
+
+            private OAuthClient _clientVO = __moduleCfg.getTokenStorageAdapter().findClientById(clientId);
+
+            public OAuthClient getOAuthClient() {
+                return _clientVO;
+            }
+
+            public OAuthClientUser getOAuthClientUser() {
+                throw new UnsupportedOperationException();
+            }
+
+            public OAuthCode getOAuthCode() {
+                throw new UnsupportedOperationException();
+            }
+
+            public boolean checkClientId() {
+                return _clientVO != null;
+            }
+
+            public boolean checkClientSecret() {
+                return _clientVO != null && StringUtils.equals(clientSecret, _clientVO.getSecretKey());
+            }
+
+            public boolean checkAuthCode() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean checkAuthUser() {
+                throw new UnsupportedOperationException();
+            }
+
+            public boolean isExpiredRefreshToken() {
+                throw new UnsupportedOperationException();
+            }
+
+            public boolean checkRefreshToken() {
+                throw new UnsupportedOperationException();
+            }
+
+            public OAuthSnsToken refreshAccessToken() {
+                throw new UnsupportedOperationException();
+            }
+
+            public OAuthSnsToken createOrUpdateAccessToken() throws Exception {
+                if (_clientVO != null) {
+                    return __moduleCfg.getTokenStorageAdapter()
+                            .saveOrUpdateAccessToken(clientId, uid, scope,
+                                    __moduleCfg.getTokenGenerator().accessToken(),
+                                    __moduleCfg.getTokenGenerator().refreshToken(),
+                                    OAuth.get().getModuleCfg().getAccessTokenExpireIn(), false);
+                }
+                return null;
+            }
+        };
+    }
+
     public IOAuthTokenHelper tokenHelper(final String clientId, final String clientSecret, final String scope, final String username, final String passwd) throws Exception {
         if (StringUtils.isBlank(clientId)) {
             throw new NullArgumentException("clientId");

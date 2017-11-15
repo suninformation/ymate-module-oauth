@@ -60,7 +60,7 @@ import javax.servlet.http.HttpServletResponse;
 public class OAuthSnsController {
 
     /**
-     * 获取CODE授权码 (response_type=code, scope=[snsapi_base|snsapi_userinfo])
+     * 获取授权码或使用简单模式直接获取访问凭证 (response_type=[code|token], scope=[snsapi_base|snsapi_userinfo])
      *
      * @return 重定向至redirect_url指定的URL地址
      * @throws Exception 可能产生的任何异常
@@ -86,7 +86,7 @@ public class OAuthSnsController {
                     String _scope = _oauthRequest.getParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_SCOPE);
                     if (!IOAuth.Scope.verified(_scope)) {
                         _response = OAuthResponseUtils.badRequest(OAuthError.CodeResponse.INVALID_SCOPE);
-                    } else if (ResponseType.CODE.equals(_responseType)) {
+                    } else {
                         String _state = _oauthRequest.getParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_STATE);
                         if (WebUtils.isPost(_request)) {
                             if (TokenProcessHelper.getInstance().isTokenValid(_request, true)) {
@@ -96,13 +96,23 @@ public class OAuthSnsController {
                                             .setParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_STATE, _state)
                                             .buildQueryMessage();
                                 } else {
-                                    OAuthCode _authzCode = _authzHelper.createOrUpdateAuthCode(_redirectURI, _scope);
-                                    //
-                                    _response = OAuthASResponse.authorizationResponse(_request, HttpServletResponse.SC_FOUND)
-                                            .location(_redirectURI)
-                                            .setCode(_authzCode.getCode())
-                                            .setParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_STATE, _state)
-                                            .buildQueryMessage();
+                                    switch (_responseType) {
+                                        case CODE:
+                                            OAuthCode _authzCode = _authzHelper.createOrUpdateAuthCode(_redirectURI, _scope);
+                                            //
+                                            _response = OAuthASResponse.authorizationResponse(_request, HttpServletResponse.SC_FOUND)
+                                                    .location(_redirectURI)
+                                                    .setCode(_authzCode.getCode())
+                                                    .setParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_STATE, _state)
+                                                    .buildQueryMessage();
+                                            break;
+                                        case TOKEN:
+                                            IOAuth.IOAuthTokenHelper _tokenHelper = OAuth.get().tokenHelper(_oauthRequest.getClientId(), _oauthRequest.getClientSecret(), _oauthRequest.getParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_CODE), _uid);
+                                            _response = OAuthResponseUtils.tokenToResponse(_tokenHelper.createOrUpdateAccessToken());
+                                            break;
+                                        default:
+                                            _response = OAuthResponseUtils.badRequest(OAuthError.CodeResponse.UNSUPPORTED_RESPONSE_TYPE);
+                                    }
                                 }
                             } else {
                                 _response = OAuthResponseUtils.badRequest(OAuthError.TokenResponse.INVALID_REQUEST);
@@ -126,8 +136,6 @@ public class OAuthSnsController {
                             }
                         }
                         return View.httpStatusView(_response.getResponseStatus()).addHeader("Location", _response.getLocationUri());
-                    } else {
-                        _response = OAuthResponseUtils.badRequest(OAuthError.CodeResponse.UNSUPPORTED_RESPONSE_TYPE);
                     }
                 }
             }
