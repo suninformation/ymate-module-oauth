@@ -22,7 +22,6 @@ import net.ymate.framework.webmvc.intercept.UserSessionCheckInterceptor;
 import net.ymate.framework.webmvc.support.UserSessionBean;
 import net.ymate.module.oauth.IOAuth;
 import net.ymate.module.oauth.OAuth;
-import net.ymate.module.oauth.OAuthCode;
 import net.ymate.module.oauth.intercept.SnsAccessTokenCheckInterceptor;
 import net.ymate.module.oauth.support.OAuthResponseUtils;
 import net.ymate.platform.core.beans.annotation.Before;
@@ -96,23 +95,7 @@ public class OAuthSnsController {
                                             .setParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_STATE, _state)
                                             .buildQueryMessage();
                                 } else {
-                                    switch (_responseType) {
-                                        case CODE:
-                                            OAuthCode _authzCode = _authzHelper.createOrUpdateAuthCode(_redirectURI, _scope);
-                                            //
-                                            _response = OAuthASResponse.authorizationResponse(_request, HttpServletResponse.SC_FOUND)
-                                                    .location(_redirectURI)
-                                                    .setCode(_authzCode.getCode())
-                                                    .setParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_STATE, _state)
-                                                    .buildQueryMessage();
-                                            break;
-                                        case TOKEN:
-                                            IOAuth.IOAuthTokenHelper _tokenHelper = OAuth.get().tokenHelper(_oauthRequest.getClientId(), _oauthRequest.getClientSecret(), _oauthRequest.getParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_CODE), _uid);
-                                            _response = OAuthResponseUtils.tokenToResponse(_tokenHelper.createOrUpdateAccessToken(), _state);
-                                            break;
-                                        default:
-                                            _response = OAuthResponseUtils.badRequest(OAuthError.CodeResponse.UNSUPPORTED_RESPONSE_TYPE);
-                                    }
+                                    _response = __parseResponseType(_request, _responseType, _authzHelper, _oauthRequest, _redirectURI, _scope, _uid, _state);
                                 }
                             } else {
                                 _response = OAuthResponseUtils.badRequest(OAuthError.TokenResponse.INVALID_REQUEST);
@@ -126,13 +109,7 @@ public class OAuthSnsController {
                                         .addAttribute("client_icon", _authzHelper.getOAuthClient().getIconUrl())
                                         .addAttribute("client_domain", _authzHelper.getOAuthClient().getDomain());
                             } else {
-                                OAuthCode _authzCode = _authzHelper.createOrUpdateAuthCode(_redirectURI, _scope);
-                                //
-                                _response = OAuthASResponse.authorizationResponse(_request, HttpServletResponse.SC_FOUND)
-                                        .location(_redirectURI)
-                                        .setCode(_authzCode.getCode())
-                                        .setParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_STATE, _state)
-                                        .buildQueryMessage();
+                                _response = __parseResponseType(_request, _responseType, _authzHelper, _oauthRequest, _redirectURI, _scope, _uid, _state);
                             }
                         }
                         return View.httpStatusView(_response.getResponseStatus()).addHeader("Location", _response.getLocationUri());
@@ -146,6 +123,25 @@ public class OAuthSnsController {
         }
         WebContext.getResponse().setStatus(_response.getResponseStatus());
         return WebUtils.buildErrorView(WebContext.getContext().getOwner(), 0, _response.getBody());
+    }
+
+    private OAuthResponse __parseResponseType(HttpServletRequest request, ResponseType _responseType, IOAuth.IOAuthAuthzHelper _authzHelper, OAuthAuthzRequest _oauthRequest, String _redirectURI, String _scope, String uid, String state) throws Exception {
+        OAuthResponse _response;
+        switch (_responseType) {
+            case CODE:
+                _response = OAuthASResponse.authorizationResponse(request, HttpServletResponse.SC_FOUND)
+                        .location(_redirectURI)
+                        .setCode(_authzHelper.createOrUpdateAuthCode(_redirectURI, _scope).getCode())
+                        .setParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_STATE, state)
+                        .buildQueryMessage();
+                break;
+            case TOKEN:
+                _response = OAuthResponseUtils.tokenToResponse(OAuth.get().tokenHelper(_oauthRequest.getClientId(), _oauthRequest.getClientSecret(), _oauthRequest.getParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_CODE), uid).createOrUpdateAccessToken(), state);
+                break;
+            default:
+                _response = OAuthResponseUtils.badRequest(OAuthError.CodeResponse.UNSUPPORTED_RESPONSE_TYPE);
+        }
+        return _response;
     }
 
     /**
