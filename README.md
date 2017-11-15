@@ -5,6 +5,7 @@
 > - 支持客户端模式 `grant_type=client_credentials`；
 > - 支持授权码模式 `grant_type=authorization_code`；
 > - 支持密码模式 `grant_type=password`；
+> - 支持简单模式 `response_type=token`；
 > - 支持`scope`权限范围：`snsapi_base`和`snsapi_userinfo`；
 > - 支持令牌更新：`grant_type=refresh_token`；
 > - 支持令牌有效性验证；
@@ -46,7 +47,7 @@
     ymp.configs.module.oauth.userinfo_adapter_class=
     
     # OAuth令牌存储适配器接口实现, 默认值: 空
-    ymp.configs.module.oauth.oauth_storage_class=
+    ymp.configs.module.oauth.storage_adapter_class=
 
 #### 示例代码
 
@@ -95,6 +96,12 @@
             Content-Type: application/x-www-form-urlencoded
 
             code=f32ab01222936356e5a8352b9beeacc3&client_id=default&client_secret=7890123&grant_type=authorization_code&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Foauth2%2Fsns%2Fredirect
+
+- 简间单模式：
+
+    - 以GET方式请求URL地址，成功则重定向并携带`access_token`令牌：
+
+            http://localhost:8080/oauth2/sns/authorize?client_id=default&response_type=token&redirect_uri=http://localhost:8080/oauth2/sns/redirect&scope=snsapi_base&state=Helloworld
 
 - 密码模式：
 
