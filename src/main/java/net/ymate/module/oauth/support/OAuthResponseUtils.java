@@ -18,6 +18,7 @@ package net.ymate.module.oauth.support;
 import net.ymate.module.oauth.IOAuth;
 import net.ymate.module.oauth.OAuth;
 import net.ymate.module.oauth.OAuthSnsToken;
+import org.apache.commons.lang.StringUtils;
 import org.apache.oltu.oauth2.as.response.OAuthASResponse;
 import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
@@ -32,14 +33,17 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class OAuthResponseUtils {
 
-    public static OAuthResponse tokenToResponse(OAuthSnsToken token) throws OAuthSystemException {
-        return OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
+    public static OAuthResponse tokenToResponse(OAuthSnsToken token, String state) throws OAuthSystemException {
+        OAuthResponse.OAuthResponseBuilder _builder = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
                 .setAccessToken(token.getAccessToken())
                 .setExpiresIn(String.valueOf(OAuth.get().getModuleCfg().getAccessTokenExpireIn()))
                 .setRefreshToken(token.getRefreshToken())
                 .setScope(token.getScope())
-                .setParam(IOAuth.Const.OPEN_ID, token.getOpenId())
-                .buildJSONMessage();
+                .setParam(IOAuth.Const.OPEN_ID, token.getOpenId());
+        if (StringUtils.isNotBlank(state)) {
+            _builder.setParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_STATE, state);
+        }
+        return _builder.buildJSONMessage();
     }
 
     public static OAuthResponse badRequest(String error) throws OAuthSystemException {

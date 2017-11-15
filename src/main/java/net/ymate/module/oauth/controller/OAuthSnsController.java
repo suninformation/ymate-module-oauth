@@ -108,7 +108,7 @@ public class OAuthSnsController {
                                             break;
                                         case TOKEN:
                                             IOAuth.IOAuthTokenHelper _tokenHelper = OAuth.get().tokenHelper(_oauthRequest.getClientId(), _oauthRequest.getClientSecret(), _oauthRequest.getParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_CODE), _uid);
-                                            _response = OAuthResponseUtils.tokenToResponse(_tokenHelper.createOrUpdateAccessToken());
+                                            _response = OAuthResponseUtils.tokenToResponse(_tokenHelper.createOrUpdateAccessToken(), _state);
                                             break;
                                         default:
                                             _response = OAuthResponseUtils.badRequest(OAuthError.CodeResponse.UNSUPPORTED_RESPONSE_TYPE);
@@ -169,7 +169,7 @@ public class OAuthSnsController {
                 } else if (!StringUtils.equals(_oauthRequest.getRedirectURI(), _tokenHelper.getOAuthCode().getRedirectUri())) {
                     _response = OAuthResponseUtils.badRequest(IOAuth.Const.REDIRECT_URI_MISMATCH);
                 } else {
-                    _response = OAuthResponseUtils.tokenToResponse(_tokenHelper.createOrUpdateAccessToken());
+                    _response = OAuthResponseUtils.tokenToResponse(_tokenHelper.createOrUpdateAccessToken(), null);
                 }
             } else if (GrantType.PASSWORD.equals(_grantType)) {
                 String _scope = _oauthRequest.getParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_SCOPE);
@@ -184,7 +184,7 @@ public class OAuthSnsController {
                     } else if (!_tokenHelper.checkAuthUser()) {
                         _response = OAuthResponseUtils.badRequest(IOAuth.Const.INVALID_USER);
                     } else {
-                        _response = OAuthResponseUtils.tokenToResponse(_tokenHelper.createOrUpdateAccessToken());
+                        _response = OAuthResponseUtils.tokenToResponse(_tokenHelper.createOrUpdateAccessToken(), null);
                     }
                 }
             } else {
@@ -217,7 +217,7 @@ public class OAuthSnsController {
                 } else if (_tokenHelper.isExpiredRefreshToken()) {
                     _response = OAuthResponseUtils.badRequest(OAuthError.ResourceResponse.EXPIRED_TOKEN);
                 } else {
-                    _response = OAuthResponseUtils.tokenToResponse(_tokenHelper.refreshAccessToken());
+                    _response = OAuthResponseUtils.tokenToResponse(_tokenHelper.refreshAccessToken(), null);
                 }
             } else {
                 _response = OAuthResponseUtils.badRequest(OAuthError.TokenResponse.UNSUPPORTED_GRANT_TYPE);
