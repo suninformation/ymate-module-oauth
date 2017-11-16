@@ -44,17 +44,13 @@ public class SnsAccessTokenCheckInterceptor implements IInterceptor {
                         String _openId = WebContext.getRequest().getParameter(IOAuth.Const.OPEN_ID);
                         String _scope = context.getContextParams().get(org.apache.oltu.oauth2.common.OAuth.OAUTH_SCOPE);
                         OAuthResponse _response = null;
-                        if (StringUtils.isBlank(_openId)) {
-                            _response = OAuthResponseUtils.unauthorizedClient(IOAuth.Const.INVALID_USER);
-                        } else {
-                            IOAuth.IOAuthAccessResourceHelper _resourceHelper = OAuth.get().resourceHelper(_oauthRequest.getAccessToken(), _openId);
-                            if (!_resourceHelper.checkAccessToken()) {
-                                _response = OAuthResponseUtils.unauthorizedClient(OAuthError.ResourceResponse.INVALID_TOKEN);
-                            } else if (_resourceHelper.isExpiredAccessToken()) {
-                                _response = OAuthResponseUtils.unauthorizedClient(OAuthError.ResourceResponse.EXPIRED_TOKEN);
-                            } else if (StringUtils.isNotBlank(_scope) && !_resourceHelper.checkScope(_scope)) {
-                                _response = OAuthResponseUtils.unauthorizedClient(OAuthError.ResourceResponse.INSUFFICIENT_SCOPE);
-                            }
+                        IOAuth.IOAuthAccessResourceHelper _resourceHelper = OAuth.get().resourceHelper(_oauthRequest.getAccessToken(), _openId);
+                        if (!_resourceHelper.checkAccessToken()) {
+                            _response = OAuthResponseUtils.unauthorizedClient(OAuthError.ResourceResponse.INVALID_TOKEN);
+                        } else if (_resourceHelper.isExpiredAccessToken()) {
+                            _response = OAuthResponseUtils.unauthorizedClient(OAuthError.ResourceResponse.EXPIRED_TOKEN);
+                        } else if (StringUtils.isNotBlank(_scope) && !_resourceHelper.checkScope(_scope)) {
+                            _response = OAuthResponseUtils.unauthorizedClient(OAuthError.ResourceResponse.INSUFFICIENT_SCOPE);
                         }
                         if (_response != null) {
                             return new HttpStatusView(_response.getResponseStatus(), false).writeBody(_response.getBody());

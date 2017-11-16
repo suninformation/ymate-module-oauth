@@ -533,7 +533,7 @@ public class OAuth implements IModule, IOAuth {
             }
 
             public boolean checkAccessToken() {
-                return _clientUserVO != null && StringUtils.equals(_clientUserVO.getId(), openId);
+                return _clientUserVO != null && (StringUtils.isBlank(openId) || StringUtils.equals(_clientUserVO.getId(), openId));
             }
 
             public boolean checkScope(String scope) {

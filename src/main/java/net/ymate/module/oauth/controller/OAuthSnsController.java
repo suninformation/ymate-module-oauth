@@ -21,6 +21,7 @@ import net.ymate.framework.core.util.WebUtils;
 import net.ymate.framework.webmvc.intercept.UserSessionCheckInterceptor;
 import net.ymate.framework.webmvc.support.UserSessionBean;
 import net.ymate.module.oauth.IOAuth;
+import net.ymate.module.oauth.IOAuthUserInfoAdapter;
 import net.ymate.module.oauth.OAuth;
 import net.ymate.module.oauth.intercept.SnsAccessTokenCheckInterceptor;
 import net.ymate.module.oauth.support.OAuthResponseUtils;
@@ -247,11 +248,19 @@ public class OAuthSnsController {
     @Before(SnsAccessTokenCheckInterceptor.class)
     @ContextParam(@ParamItem(key = IOAuth.Const.SCOPE, value = IOAuth.Scope.SNSAPI_USERINFO))
     public IView userinfo(@RequestParam(IOAuth.Const.ACCESS_TOKEN) String accountToken, @RequestParam(IOAuth.Const.OPEN_ID) String openId) throws Exception {
+        OAuthResponse _response = null;
         try {
-            return View.jsonView(OAuth.get().getModuleCfg().getUserInfoAdapter().getUserInfo(OAuth.get().resourceHelper(accountToken, openId).getOAuthClientUser().getUid()));
+            if (StringUtils.isBlank(openId)) {
+                _response = OAuthResponseUtils.badRequest(IOAuth.Const.INVALID_USER);
+            }
+            IOAuthUserInfoAdapter _adapter = OAuth.get().getModuleCfg().getUserInfoAdapter();
+            if (_adapter != null) {
+                return View.jsonView(_adapter.getUserInfo(OAuth.get().resourceHelper(accountToken, openId).getOAuthClientUser().getUid()));
+            }
+            _response = OAuthResponseUtils.unauthorizedClient(OAuthError.ResourceResponse.INVALID_REQUEST);
         } catch (Exception e) {
-            OAuthResponse _response = OAuthResponseUtils.badRequest(IOAuth.Const.INVALID_USER);
-            return new HttpStatusView(_response.getResponseStatus(), false).writeBody(_response.getBody());
+            _response = OAuthResponseUtils.badRequest(IOAuth.Const.INVALID_USER);
         }
+        return new HttpStatusView(_response.getResponseStatus(), false).writeBody(_response.getBody());
     }
 }
