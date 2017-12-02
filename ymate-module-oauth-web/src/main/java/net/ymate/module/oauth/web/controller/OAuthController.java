@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.ymate.module.oauth.controller;
+package net.ymate.module.oauth.web.controller;
 
 import net.ymate.module.oauth.IOAuth;
 import net.ymate.module.oauth.OAuth;

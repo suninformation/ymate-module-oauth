@@ -32,14 +32,17 @@ public class DefaultTokenGenerator implements IOAuthTokenGenerator {
         __issuer = new OAuthIssuerImpl(new MD5Generator());
     }
 
+    @Override
     public String accessToken() throws Exception {
         return __issuer.accessToken();
     }
 
+    @Override
     public String authorizationCode() throws Exception {
         return __issuer.authorizationCode();
     }
 
+    @Override
     public String refreshToken() throws Exception {
         return __issuer.refreshToken();
     }

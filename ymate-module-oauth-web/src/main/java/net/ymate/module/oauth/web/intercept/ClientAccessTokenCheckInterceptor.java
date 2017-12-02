@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.ymate.module.oauth.intercept;
+package net.ymate.module.oauth.web.intercept;
 
 import net.ymate.module.oauth.IOAuth;
 import net.ymate.module.oauth.OAuth;
@@ -34,6 +34,7 @@ import org.apache.oltu.oauth2.rs.request.OAuthAccessResourceRequest;
  */
 public class ClientAccessTokenCheckInterceptor implements IInterceptor {
 
+    @Override
     public Object intercept(InterceptContext context) throws Exception {
         switch (context.getDirection()) {
             case BEFORE:

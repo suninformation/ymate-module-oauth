@@ -67,30 +67,37 @@ public class DefaultModuleCfg implements IOAuthModuleCfg {
         __storageAdapter = ClassUtils.impl(_moduleCfgs.get("storage_adapter_class"), IOAuthStorageAdapter.class, getClass());
     }
 
+    @Override
     public int getAccessTokenExpireIn() {
         return __accessTokenExpireIn;
     }
 
+    @Override
     public String getCacheNamePrefix() {
         return __cacheNamePrefix;
     }
 
+    @Override
     public boolean isSnsEnabled() {
         return __snsEnabled;
     }
 
+    @Override
     public String getAuthorizationView() {
         return __authorizationView;
     }
 
+    @Override
     public IOAuthTokenGenerator getTokenGenerator() {
         return __tokenGenerator;
     }
 
+    @Override
     public IOAuthUserInfoAdapter getUserInfoAdapter() {
         return __userInfoAdaptor;
     }
 
+    @Override
     public IOAuthStorageAdapter getTokenStorageAdapter() {
         return __storageAdapter;
     }

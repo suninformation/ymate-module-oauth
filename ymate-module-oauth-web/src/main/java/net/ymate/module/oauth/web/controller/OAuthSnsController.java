@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.ymate.module.oauth.controller;
+package net.ymate.module.oauth.web.controller;
 
 import net.ymate.framework.core.Optional;
 import net.ymate.framework.core.support.TokenProcessHelper;
@@ -23,11 +23,11 @@ import net.ymate.framework.webmvc.support.UserSessionBean;
 import net.ymate.module.oauth.IOAuth;
 import net.ymate.module.oauth.IOAuthUserInfoAdapter;
 import net.ymate.module.oauth.OAuth;
-import net.ymate.module.oauth.intercept.SnsAccessTokenCheckInterceptor;
 import net.ymate.module.oauth.support.OAuthResponseUtils;
+import net.ymate.module.oauth.web.intercept.OAuthSnsStatusInterceptor;
+import net.ymate.module.oauth.web.intercept.SnsAccessTokenCheckInterceptor;
 import net.ymate.platform.core.beans.annotation.Before;
 import net.ymate.platform.core.beans.annotation.ContextParam;
-import net.ymate.platform.core.beans.annotation.Ignored;
 import net.ymate.platform.core.beans.annotation.ParamItem;
 import net.ymate.platform.webmvc.annotation.Controller;
 import net.ymate.platform.webmvc.annotation.RequestMapping;
@@ -56,7 +56,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Controller
 @RequestMapping("/oauth2/sns")
-@Ignored
+@Before(OAuthSnsStatusInterceptor.class)
 public class OAuthSnsController {
 
     /**
