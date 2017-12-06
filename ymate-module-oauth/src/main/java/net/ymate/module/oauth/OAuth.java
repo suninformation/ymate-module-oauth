@@ -527,7 +527,7 @@ public class OAuth implements IModule, IOAuth {
                 if (_clientUserVO != null) {
                     if (System.currentTimeMillis() - _clientUserVO.getLastModifyTime() < _clientUserVO.getExpiresIn() * 1000) {
                         return __moduleCfg.getTokenStorageAdapter()
-                                .saveOrUpdateAccessToken(clientId, _clientUserVO.getUid(), null, null, __moduleCfg.getTokenGenerator().refreshToken(), 0, true);
+                                .saveOrUpdateAccessToken(clientId, _clientUserVO.getUid(), _clientUserVO.getScope(), _clientUserVO.getAccessToken(), __moduleCfg.getTokenGenerator().refreshToken(), 0, true);
                     } else {
                         return __moduleCfg.getTokenStorageAdapter()
                                 .saveOrUpdateAccessToken(clientId, _clientUserVO.getUid(), _clientUserVO.getScope(),
