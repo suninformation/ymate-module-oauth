@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 the original author or authors.
+ * Copyright 2007-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,29 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.ymate.module.oauth;
+package net.ymate.module.oauth.annotation;
+
+import java.lang.annotation.*;
 
 /**
- * @author 刘镇 (suninformation@163.com) on 2017/4/30 下午10:50
+ * 声明一个类为OAuth授权作用域处理器或设置访问一个类方法所需要用户的授权作用域名称
+ *
+ * @author 刘镇 (suninformation@163.com) on 2018/1/14 下午6:06
  * @version 1.0
  */
-public interface IOAuthTokenGenerator {
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface OAuthScope {
 
     /**
-     * @return 生成访问令牌
-     * @throws Exception 可能产生的任何异常
+     * @return 需要用户授权的作用域名称
      */
-    String accessToken() throws Exception;
+    String value() default "";
 
     /**
-     * @return 生成授权码
-     * @throws Exception 可能产生的任何异常
+     * @return 是否自动调用处理器
      */
-    String authorizationCode() throws Exception;
-
-    /**
-     * @return 生成刷新令牌
-     * @throws Exception 可能产生的任何异常
-     */
-    String refreshToken() throws Exception;
+    boolean automatic() default true;
 }

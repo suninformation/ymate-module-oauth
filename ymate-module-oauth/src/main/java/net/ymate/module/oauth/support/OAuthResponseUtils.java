@@ -15,10 +15,7 @@
  */
 package net.ymate.module.oauth.support;
 
-import net.ymate.module.oauth.IOAuth;
-import net.ymate.module.oauth.OAuth;
-import net.ymate.module.oauth.OAuthSnsToken;
-import org.apache.commons.lang.StringUtils;
+import net.ymate.platform.core.lang.BlurObject;
 import org.apache.oltu.oauth2.as.response.OAuthASResponse;
 import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
@@ -26,25 +23,13 @@ import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * @author 刘镇 (suninformation@163.com) on 2017/9/6 下午4:07
  * @version 1.0
  */
 public class OAuthResponseUtils {
-
-    public static OAuthResponse tokenToResponse(OAuthSnsToken token, String state) throws OAuthSystemException {
-        OAuthResponse.OAuthResponseBuilder _builder = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
-                .setAccessToken(token.getAccessToken())
-                .setExpiresIn(String.valueOf(OAuth.get().getModuleCfg().getAccessTokenExpireIn()))
-                .setRefreshToken(token.getRefreshToken())
-                .setScope(token.getScope())
-                .setParam(IOAuth.Const.OPEN_ID, token.getOpenId());
-        if (StringUtils.isNotBlank(state)) {
-            _builder.setParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_STATE, state);
-        }
-        return _builder.buildJSONMessage();
-    }
 
     public static OAuthResponse badRequest(String error) throws OAuthSystemException {
         return OAuthASResponse
@@ -72,5 +57,12 @@ public class OAuthResponseUtils {
                 .errorResponse(HttpServletResponse.SC_BAD_REQUEST)
                 .error(e)
                 .buildJSONMessage();
+    }
+
+    public static OAuthResponse.OAuthResponseBuilder appendParams(Map<String, Object> params, OAuthResponse.OAuthResponseBuilder builder) {
+        for (Map.Entry<String, Object> _entry : params.entrySet()) {
+            builder.setParam(_entry.getKey(), BlurObject.bind(_entry.getValue()).toStringValue());
+        }
+        return builder;
     }
 }

@@ -15,13 +15,20 @@
  */
 package net.ymate.module.oauth.impl;
 
-import net.ymate.module.oauth.*;
+import net.ymate.module.oauth.IOAuth;
+import net.ymate.module.oauth.IOAuthModuleCfg;
+import net.ymate.module.oauth.IOAuthStorageAdapter;
+import net.ymate.module.oauth.IOAuthTokenGenerator;
 import net.ymate.platform.core.YMP;
 import net.ymate.platform.core.lang.BlurObject;
 import net.ymate.platform.core.util.ClassUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.oltu.oauth2.common.message.types.GrantType;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author 刘镇 (suninformation@163.com) on 2017/02/26 上午 02:08
@@ -31,15 +38,17 @@ public class DefaultModuleCfg implements IOAuthModuleCfg {
 
     private int __accessTokenExpireIn;
 
+    private int __refreshCountMax;
+
+    private int __refreshTokenExpireIn;
+
+    private int __authorizationCodeExpireIn;
+
     private String __cacheNamePrefix;
 
-    private boolean __snsEnabled;
-
-    private String __authorizationView;
+    private Set<GrantType> __allowGrantTypes;
 
     private IOAuthTokenGenerator __tokenGenerator;
-
-    private IOAuthUserInfoAdapter __userInfoAdaptor;
 
     private IOAuthStorageAdapter __storageAdapter;
 
@@ -51,20 +60,46 @@ public class DefaultModuleCfg implements IOAuthModuleCfg {
             __accessTokenExpireIn = 7200;
         }
         //
+        __refreshCountMax = BlurObject.bind(_moduleCfgs.get("refresh_count_max")).toIntValue();
+        if (__refreshCountMax < 0) {
+            __refreshCountMax = 0;
+        }
+        //
+        __refreshTokenExpireIn = BlurObject.bind(_moduleCfgs.get("refresh_token_expire_in")).toIntValue();
+        if (__refreshTokenExpireIn <= 0) {
+            __refreshTokenExpireIn = 30;
+        }
+        //
+        __authorizationCodeExpireIn = BlurObject.bind(_moduleCfgs.get("authorization_code_expire_in")).toIntValue();
+        if (__authorizationCodeExpireIn <= 0) {
+            __authorizationCodeExpireIn = 5;
+        }
+        //
         __cacheNamePrefix = StringUtils.trimToEmpty(_moduleCfgs.get("cache_name_prefix"));
         //
-        __snsEnabled = BlurObject.bind(_moduleCfgs.get("sns_enabled")).toBooleanValue();
-        if (__snsEnabled) {
-            __authorizationView = StringUtils.defaultIfBlank(_moduleCfgs.get("authorization_view"), "_views/oauth2/sns-authorization");
-            __userInfoAdaptor = ClassUtils.impl(_moduleCfgs.get("userinfo_adapter_class"), IOAuthUserInfoAdapter.class, getClass());
+        __allowGrantTypes = new HashSet<GrantType>();
+        String _grantTypeStr = StringUtils.defaultIfBlank(_moduleCfgs.get("allow_grant_types"), "none");
+        if (!StringUtils.containsIgnoreCase(_grantTypeStr, "none")) {
+            String[] _types = StringUtils.split(_grantTypeStr, "|");
+            if (ArrayUtils.isNotEmpty(_types)) {
+                for (String _item : _types) {
+                    try {
+                        GrantType _type = GrantType.valueOf(StringUtils.upperCase(StringUtils.trimToEmpty(_item)));
+                        __allowGrantTypes.add(_type);
+                    } catch (IllegalArgumentException ignored) {
+                    }
+                }
+            }
         }
         //
-        __tokenGenerator = ClassUtils.impl(_moduleCfgs.get("token_generator_class"), IOAuthTokenGenerator.class, getClass());
-        if (__tokenGenerator == null) {
-            __tokenGenerator = new DefaultTokenGenerator();
+        if (!__allowGrantTypes.isEmpty()) {
+            __tokenGenerator = ClassUtils.impl(_moduleCfgs.get("token_generator_class"), IOAuthTokenGenerator.class, getClass());
+            if (__tokenGenerator == null) {
+                __tokenGenerator = new DefaultTokenGenerator();
+            }
+            //
+            __storageAdapter = ClassUtils.impl(_moduleCfgs.get("storage_adapter_class"), IOAuthStorageAdapter.class, getClass());
         }
-        //
-        __storageAdapter = ClassUtils.impl(_moduleCfgs.get("storage_adapter_class"), IOAuthStorageAdapter.class, getClass());
     }
 
     @Override
@@ -73,28 +108,33 @@ public class DefaultModuleCfg implements IOAuthModuleCfg {
     }
 
     @Override
+    public int getRefreshCountMax() {
+        return __refreshCountMax;
+    }
+
+    @Override
+    public int getRefreshTokenExpireIn() {
+        return __refreshTokenExpireIn;
+    }
+
+    @Override
+    public int getAuthorizationCodeExpireIn() {
+        return __authorizationCodeExpireIn;
+    }
+
+    @Override
     public String getCacheNamePrefix() {
         return __cacheNamePrefix;
     }
 
     @Override
-    public boolean isSnsEnabled() {
-        return __snsEnabled;
-    }
-
-    @Override
-    public String getAuthorizationView() {
-        return __authorizationView;
+    public Set<GrantType> getAllowGrantTypes() {
+        return __allowGrantTypes;
     }
 
     @Override
     public IOAuthTokenGenerator getTokenGenerator() {
         return __tokenGenerator;
-    }
-
-    @Override
-    public IOAuthUserInfoAdapter getUserInfoAdapter() {
-        return __userInfoAdaptor;
     }
 
     @Override

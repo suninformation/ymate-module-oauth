@@ -15,18 +15,33 @@
  */
 package net.ymate.module.oauth;
 
-import net.ymate.module.oauth.impl.DefaultModuleCfg;
+import net.ymate.module.oauth.annotation.OAuthScope;
+import net.ymate.module.oauth.base.OAuthClientUserBean;
+import net.ymate.module.oauth.base.OAuthTokenBean;
+import net.ymate.module.oauth.handle.OAuthScopeHandler;
+import net.ymate.module.oauth.impl.*;
+import net.ymate.module.oauth.support.OAuthResponseUtils;
 import net.ymate.platform.core.Version;
 import net.ymate.platform.core.YMP;
-import net.ymate.platform.core.lang.BlurObject;
+import net.ymate.platform.core.beans.BeanMeta;
 import net.ymate.platform.core.module.IModule;
 import net.ymate.platform.core.module.annotation.Module;
-import net.ymate.platform.core.util.DateTimeUtils;
-import net.ymate.platform.core.util.RuntimeUtils;
-import org.apache.commons.lang.NullArgumentException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.oltu.oauth2.common.error.OAuthError;
+import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
+import org.apache.oltu.oauth2.common.message.OAuthResponse;
+import org.apache.oltu.oauth2.common.message.types.GrantType;
+import org.apache.oltu.oauth2.common.message.types.ParameterStyle;
+import org.apache.oltu.oauth2.common.message.types.ResponseType;
+import org.apache.oltu.oauth2.rs.request.OAuthAccessResourceRequest;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author 刘镇 (suninformation@163.com) on 2017/02/26 上午 02:08
@@ -46,6 +61,8 @@ public class OAuth implements IModule, IOAuth {
     private IOAuthModuleCfg __moduleCfg;
 
     private boolean __inited;
+
+    private Map<String, Class<? extends IOAuthScopeProcessor>> __scopeProcessors = new HashMap<String, Class<? extends IOAuthScopeProcessor>>();
 
     public static IOAuth get() {
         if (__instance == null) {
@@ -70,13 +87,11 @@ public class OAuth implements IModule, IOAuth {
             _LOG.info("Initializing ymate-module-oauth-" + VERSION);
             //
             __owner = owner;
+            __owner.registerHandler(OAuthScope.class, new OAuthScopeHandler(this));
             __moduleCfg = new DefaultModuleCfg(owner);
-            __moduleCfg.getTokenStorageAdapter().init(this);
             //
-            if (__moduleCfg.isSnsEnabled()) {
-                if (__moduleCfg.getUserInfoAdapter() != null) {
-                    __moduleCfg.getUserInfoAdapter().init(this);
-                }
+            if (__moduleCfg.getTokenStorageAdapter() != null) {
+                __moduleCfg.getTokenStorageAdapter().init(this);
             }
             //
             __inited = true;
@@ -89,13 +104,114 @@ public class OAuth implements IModule, IOAuth {
     }
 
     @Override
+    public void registerScopeProcessor(Class<? extends IOAuthScopeProcessor> targetClass) throws Exception {
+        IOAuthScopeProcessor _scopeProc = targetClass.newInstance();
+        if (StringUtils.isNotBlank(_scopeProc.getName())) {
+            _scopeProc.init(this);
+            __scopeProcessors.put(_scopeProc.getName(), targetClass);
+            __owner.registerBean(BeanMeta.create(_scopeProc, targetClass));
+            //
+            if (__owner.getConfig().isDevelopMode()) {
+                _LOG.debug("--> Registered scope processor [" + _scopeProc.getName() + "] - " + targetClass.getName());
+            }
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends IOAuthScopeProcessor> T getScopeProcessor(String name) {
+        if (StringUtils.isNotBlank(name) && __scopeProcessors.containsKey(name)) {
+            return (T) YMP.get().getBean(__scopeProcessors.get(name));
+        }
+        return null;
+    }
+
+    @Override
+    public Set<String> getScopeNames() {
+        return Collections.unmodifiableSet(__scopeProcessors.keySet());
+    }
+
+    @Override
+    public IOAuthGrantProcessor getGrantProcessor(GrantType grantType) {
+        IOAuthGrantProcessor _process = null;
+        if (grantType != null) {
+            if (!__moduleCfg.getAllowGrantTypes().isEmpty() && __moduleCfg.getAllowGrantTypes().contains(grantType)) {
+                switch (grantType) {
+                    case AUTHORIZATION_CODE:
+                        _process = new AuthorizationCodeGrantProcessor(this);
+                        break;
+                    case IMPLICIT:
+                        _process = new ImplicitGrantProcessor(this, ResponseType.TOKEN);
+                        break;
+                    case PASSWORD:
+                        _process = new PasswordGrantProcessor(this);
+                        break;
+                    case REFRESH_TOKEN:
+                        _process = new RefreshTokenGrantProcessor(this);
+                        break;
+                    case CLIENT_CREDENTIALS:
+                        _process = new ClientCredentialsGrantProcessor(this);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        return _process != null ? _process : IOAuthGrantProcessor.UNSUPPORTED_GRANT_TYPE;
+    }
+
+    @Override
+    public OAuthResponse checkClientAccessToken(HttpServletRequest request) throws Exception {
+        OAuthResponse _response = null;
+        try {
+            OAuthAccessResourceRequest _oauthRequest = new OAuthAccessResourceRequest(request, ParameterStyle.QUERY, ParameterStyle.BODY, ParameterStyle.HEADER);
+            OAuthTokenBean _tokenBean = __moduleCfg.getTokenStorageAdapter().findClientByAccessToken(_oauthRequest.getAccessToken());
+            //
+            if (_tokenBean == null) {
+                _response = OAuthResponseUtils.unauthorizedClient(OAuthError.ResourceResponse.INVALID_TOKEN);
+            } else if (!_tokenBean.checkAccessToken()) {
+                _response = OAuthResponseUtils.unauthorizedClient(OAuthError.ResourceResponse.EXPIRED_TOKEN);
+            } else {
+                request.setAttribute(OAuthTokenBean.class.getName(), _tokenBean);
+                request.setAttribute(Const.ACCESS_TOKEN, _oauthRequest.getAccessToken());
+            }
+        } catch (OAuthProblemException e) {
+            _response = OAuthResponseUtils.badRequestError(e);
+        }
+        return _response;
+    }
+
+    @Override
+    public OAuthResponse checkUserAccessToken(HttpServletRequest request, String scope) throws Exception {
+        OAuthResponse _response = null;
+        try {
+            OAuthAccessResourceRequest _oauthRequest = new OAuthAccessResourceRequest(request, ParameterStyle.QUERY);
+            OAuthClientUserBean _tokenBean = __moduleCfg.getTokenStorageAdapter().findUserByAccessToken(_oauthRequest.getAccessToken());
+            //
+            if (_tokenBean == null) {
+                _response = OAuthResponseUtils.unauthorizedClient(OAuthError.ResourceResponse.INVALID_TOKEN);
+            } else if (!_tokenBean.checkAccessToken()) {
+                _response = OAuthResponseUtils.unauthorizedClient(OAuthError.ResourceResponse.EXPIRED_TOKEN);
+            } else if (StringUtils.isNotBlank(scope) && !_tokenBean.containsScope(Collections.singleton(scope))) {
+                _response = OAuthResponseUtils.unauthorizedClient(OAuthError.ResourceResponse.INSUFFICIENT_SCOPE);
+            } else {
+                request.setAttribute(OAuthTokenBean.class.getName(), _tokenBean);
+                request.setAttribute(Const.ACCESS_TOKEN, _oauthRequest.getAccessToken());
+            }
+        } catch (OAuthProblemException e) {
+            _response = OAuthResponseUtils.badRequestError(e);
+        }
+        return _response;
+    }
+
+    @Override
     public void destroy() throws Exception {
         if (__inited) {
             __inited = false;
-            if (__moduleCfg.isSnsEnabled() && __moduleCfg.getUserInfoAdapter() != null) {
-                __moduleCfg.getUserInfoAdapter().destroy();
+            //
+            if (__moduleCfg.getTokenStorageAdapter() != null) {
+                __moduleCfg.getTokenStorageAdapter().destroy();
             }
-            __moduleCfg.getTokenStorageAdapter().destroy();
             //
             __moduleCfg = null;
             __owner = null;
@@ -110,507 +226,5 @@ public class OAuth implements IModule, IOAuth {
     @Override
     public IOAuthModuleCfg getModuleCfg() {
         return __moduleCfg;
-    }
-
-    @Override
-    public IOAuthClientHelper clientHelper(final String clientId, final String clientSecret) throws Exception {
-        if (StringUtils.isBlank(clientId)) {
-            throw new NullArgumentException("clientId");
-        }
-        if (StringUtils.isBlank(clientSecret)) {
-            throw new NullArgumentException("clientSecret");
-        }
-        //
-        return new IOAuthClientHelper() {
-
-            private OAuthClient _clientVO = __moduleCfg.getTokenStorageAdapter().findClientById(clientId);
-
-            @Override
-            public OAuthClient getOAuthClient() {
-                return _clientVO;
-            }
-
-            @Override
-            public boolean checkClientId() {
-                return _clientVO != null;
-            }
-
-            @Override
-            public boolean checkClientSecret() {
-                return _clientVO != null && StringUtils.equals(clientSecret, _clientVO.getSecretKey());
-            }
-
-            @Override
-            public OAuthToken createOrUpdateAccessToken() throws Exception {
-                if (_clientVO != null) {
-                    return __moduleCfg.getTokenStorageAdapter().saveOrUpdateClientAccessToken(clientId, __moduleCfg.getTokenGenerator().accessToken(), OAuth.get().getModuleCfg().getAccessTokenExpireIn());
-                }
-                return null;
-            }
-        };
-    }
-
-    //
-
-    @Override
-    public IOAuthAuthzHelper authzHelper(final String clientId, final String uid) throws Exception {
-        return new IOAuthAuthzHelper() {
-
-            private OAuthClient _clientVO = __moduleCfg.getTokenStorageAdapter().findClientById(clientId);
-
-            private OAuthClientUser _clientUserVO = __moduleCfg.getTokenStorageAdapter().findUser(clientId, uid);
-
-            @Override
-            public OAuthClient getOAuthClient() {
-                return _clientVO;
-            }
-
-            @Override
-            public OAuthClientUser getOAuthClientUser() {
-                return _clientUserVO;
-            }
-
-            @Override
-            public boolean checkClientId() {
-                return _clientUserVO != null && StringUtils.isNotBlank(_clientUserVO.getClientId());
-            }
-
-            @Override
-            public boolean checkUserNeedAuth() {
-                return _clientUserVO == null || !BlurObject.bind(_clientUserVO.getIsAuthorized()).toBooleanValue();
-            }
-
-            @Override
-            public OAuthCode createOrUpdateAuthCode(String redirectUri, String scope) throws Exception {
-                if (_clientUserVO != null) {
-                    return __moduleCfg.getTokenStorageAdapter().saveOrUpdateAuthCode(__moduleCfg.getTokenGenerator().authorizationCode(), redirectUri, clientId, uid, scope);
-                }
-                return null;
-            }
-        };
-    }
-
-    //
-
-    @Override
-    public IOAuthTokenHelper tokenHelper(final String clientId, final String clientSecret, final String code) throws Exception {
-        if (StringUtils.isBlank(clientId)) {
-            throw new NullArgumentException("clientId");
-        }
-        if (StringUtils.isBlank(clientSecret)) {
-            throw new NullArgumentException("clientSecret");
-        }
-        if (StringUtils.isBlank(code)) {
-            throw new NullArgumentException("code");
-        }
-        //
-        return new IOAuthTokenHelper() {
-
-            private OAuthClient _clientVO = __moduleCfg.getTokenStorageAdapter().findClientById(clientId);
-
-            private OAuthCode _authzCode = __moduleCfg.getTokenStorageAdapter().findAuthCode(clientId, code);
-
-            @Override
-            public OAuthClient getOAuthClient() {
-                return _clientVO;
-            }
-
-            @Override
-            public OAuthClientUser getOAuthClientUser() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public OAuthCode getOAuthCode() {
-                return _authzCode;
-            }
-
-            @Override
-            public boolean checkClientId() {
-                return _clientVO != null;
-            }
-
-            @Override
-            public boolean checkClientSecret() {
-                return _clientVO != null && StringUtils.equals(clientSecret, _clientVO.getSecretKey());
-            }
-
-            @Override
-            public boolean checkAuthCode() {
-                return _authzCode != null;
-            }
-
-            @Override
-            public boolean checkAuthUser() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean isExpiredRefreshToken() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean checkRefreshToken() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public OAuthSnsToken refreshAccessToken() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public OAuthSnsToken createOrUpdateAccessToken() throws Exception {
-                if (_clientVO != null && _authzCode != null) {
-                    return __moduleCfg.getTokenStorageAdapter()
-                            .saveOrUpdateAccessToken(clientId, _authzCode.getUid(), _authzCode.getScope(),
-                                    __moduleCfg.getTokenGenerator().accessToken(),
-                                    __moduleCfg.getTokenGenerator().refreshToken(),
-                                    OAuth.get().getModuleCfg().getAccessTokenExpireIn(), false);
-                }
-                return null;
-            }
-        };
-    }
-
-    @Override
-    public IOAuthTokenHelper tokenHelper(final String clientId, final String clientSecret, final String scope, final String uid) throws Exception {
-        if (StringUtils.isBlank(clientId)) {
-            throw new NullArgumentException("clientId");
-        }
-        if (StringUtils.isBlank(clientSecret)) {
-            throw new NullArgumentException("clientSecret");
-        }
-        if (StringUtils.isBlank(scope)) {
-            throw new NullArgumentException("scope");
-        }
-        if (StringUtils.isBlank(uid)) {
-            throw new NullArgumentException("uid");
-        }
-        //
-        return new IOAuthTokenHelper() {
-
-            private OAuthClient _clientVO = __moduleCfg.getTokenStorageAdapter().findClientById(clientId);
-
-            @Override
-            public OAuthClient getOAuthClient() {
-                return _clientVO;
-            }
-
-            @Override
-            public OAuthClientUser getOAuthClientUser() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public OAuthCode getOAuthCode() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean checkClientId() {
-                return _clientVO != null;
-            }
-
-            @Override
-            public boolean checkClientSecret() {
-                return _clientVO != null && StringUtils.equals(clientSecret, _clientVO.getSecretKey());
-            }
-
-            @Override
-            public boolean checkAuthCode() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean checkAuthUser() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean isExpiredRefreshToken() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean checkRefreshToken() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public OAuthSnsToken refreshAccessToken() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public OAuthSnsToken createOrUpdateAccessToken() throws Exception {
-                if (_clientVO != null) {
-                    return __moduleCfg.getTokenStorageAdapter()
-                            .saveOrUpdateAccessToken(clientId, uid, scope,
-                                    __moduleCfg.getTokenGenerator().accessToken(),
-                                    __moduleCfg.getTokenGenerator().refreshToken(),
-                                    OAuth.get().getModuleCfg().getAccessTokenExpireIn(), false);
-                }
-                return null;
-            }
-        };
-    }
-
-    @Override
-    public IOAuthTokenHelper tokenHelper(final String clientId, final String clientSecret, final String scope, final String username, final String passwd) throws Exception {
-        if (StringUtils.isBlank(clientId)) {
-            throw new NullArgumentException("clientId");
-        }
-        if (StringUtils.isBlank(clientSecret)) {
-            throw new NullArgumentException("clientSecret");
-        }
-        if (StringUtils.isBlank(scope)) {
-            throw new NullArgumentException("scope");
-        }
-        if (StringUtils.isBlank(username)) {
-            throw new NullArgumentException("username");
-        }
-        if (StringUtils.isBlank(passwd)) {
-            throw new NullArgumentException("passwd");
-        }
-        //
-        return new IOAuthTokenHelper() {
-
-            private OAuthClient _clientVO = __moduleCfg.getTokenStorageAdapter().findClientById(clientId);
-
-            private String _uid;
-
-            @Override
-            public OAuthClient getOAuthClient() {
-                return _clientVO;
-            }
-
-            @Override
-            public OAuthClientUser getOAuthClientUser() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public OAuthCode getOAuthCode() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean checkClientId() {
-                return _clientVO != null;
-            }
-
-            @Override
-            public boolean checkClientSecret() {
-                return _clientVO != null && StringUtils.equals(clientSecret, _clientVO.getSecretKey());
-            }
-
-            @Override
-            public boolean checkAuthCode() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean checkAuthUser() {
-                if (_uid == null) {
-                    try {
-                        _uid = __moduleCfg.getUserInfoAdapter().verify(username, passwd);
-                    } catch (Exception e) {
-                        _LOG.warn("", RuntimeUtils.unwrapThrow(e));
-                    }
-                }
-                return _uid != null;
-            }
-
-            @Override
-            public boolean isExpiredRefreshToken() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean checkRefreshToken() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public OAuthSnsToken refreshAccessToken() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public OAuthSnsToken createOrUpdateAccessToken() throws Exception {
-                if (_clientVO != null && _uid != null) {
-                    return __moduleCfg.getTokenStorageAdapter()
-                            .saveOrUpdateAccessToken(clientId, _uid, scope,
-                                    __moduleCfg.getTokenGenerator().accessToken(),
-                                    __moduleCfg.getTokenGenerator().refreshToken(),
-                                    OAuth.get().getModuleCfg().getAccessTokenExpireIn(), false);
-                }
-                return null;
-            }
-        };
-    }
-
-    @Override
-    public IOAuthTokenHelper tokenHelper(final String clientId, final String refreshToken) throws Exception {
-        if (StringUtils.isBlank(clientId)) {
-            throw new NullArgumentException("clientId");
-        }
-        if (StringUtils.isBlank(refreshToken)) {
-            throw new NullArgumentException("refreshToken");
-        }
-        //
-        return new IOAuthTokenHelper() {
-
-            private OAuthClientUser _clientUserVO = __moduleCfg.getTokenStorageAdapter().findUserByRefreshToken(clientId, refreshToken);
-
-            @Override
-            public OAuthClient getOAuthClient() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public OAuthClientUser getOAuthClientUser() {
-                return _clientUserVO;
-            }
-
-            @Override
-            public OAuthCode getOAuthCode() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean checkClientId() {
-                return _clientUserVO != null;
-            }
-
-            @Override
-            public boolean checkClientSecret() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean checkAuthCode() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean checkAuthUser() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean isExpiredRefreshToken() {
-                if (_clientUserVO != null) {
-                    int _dayNum = 90;
-                    switch (_clientUserVO.getRefreshCount()) {
-                        case 0:
-                            _dayNum = 7;
-                            break;
-                        case 1:
-                            _dayNum = 30;
-                            break;
-                    }
-                    return System.currentTimeMillis() - _clientUserVO.getLastModifyTime() >= DateTimeUtils.DAY * _dayNum;
-                }
-                return true;
-            }
-
-            @Override
-            public boolean checkRefreshToken() {
-                return _clientUserVO != null;
-            }
-
-            @Override
-            public OAuthSnsToken refreshAccessToken() throws Exception {
-                if (_clientUserVO != null) {
-                    if (System.currentTimeMillis() - _clientUserVO.getLastModifyTime() < _clientUserVO.getExpiresIn() * 1000) {
-                        return __moduleCfg.getTokenStorageAdapter()
-                                .saveOrUpdateAccessToken(clientId, _clientUserVO.getUid(), _clientUserVO.getScope(), _clientUserVO.getAccessToken(), __moduleCfg.getTokenGenerator().refreshToken(), 0, true);
-                    } else {
-                        return __moduleCfg.getTokenStorageAdapter()
-                                .saveOrUpdateAccessToken(clientId, _clientUserVO.getUid(), _clientUserVO.getScope(),
-                                        __moduleCfg.getTokenGenerator().accessToken(),
-                                        __moduleCfg.getTokenGenerator().refreshToken(),
-                                        OAuth.get().getModuleCfg().getAccessTokenExpireIn(), true);
-                    }
-                }
-                return null;
-            }
-
-            @Override
-            public OAuthSnsToken createOrUpdateAccessToken() {
-                throw new UnsupportedOperationException();
-            }
-        };
-    }
-
-    //
-
-    @Override
-    public IOAuthAccessResourceHelper resourceHelper(final String accessToken) throws Exception {
-        return new IOAuthAccessResourceHelper() {
-
-            private OAuthClient _clientVO = __moduleCfg.getTokenStorageAdapter().findClientByAccessToken(accessToken);
-
-            @Override
-            public OAuthClient getOAuthClient() {
-                return _clientVO;
-            }
-
-            @Override
-            public OAuthClientUser getOAuthClientUser() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean isExpiredAccessToken() {
-                return System.currentTimeMillis() - _clientVO.getLastModifyTime() >= _clientVO.getExpiresIn() * 1000;
-            }
-
-            @Override
-            public boolean checkAccessToken() {
-                return _clientVO != null;
-            }
-
-            @Override
-            public boolean checkScope(String scope) {
-                throw new UnsupportedOperationException();
-            }
-        };
-    }
-
-    @Override
-    public IOAuthAccessResourceHelper resourceHelper(final String accessToken, final String openId) throws Exception {
-        return new IOAuthAccessResourceHelper() {
-
-            private OAuthClientUser _clientUserVO = __moduleCfg.getTokenStorageAdapter().findUserByAccessToken(accessToken);
-
-            @Override
-            public OAuthClient getOAuthClient() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public OAuthClientUser getOAuthClientUser() {
-                return _clientUserVO;
-            }
-
-            @Override
-            public boolean isExpiredAccessToken() {
-                return System.currentTimeMillis() - _clientUserVO.getLastModifyTime() >= _clientUserVO.getExpiresIn() * 1000;
-            }
-
-            @Override
-            public boolean checkAccessToken() {
-                return _clientUserVO != null && (!StringUtils.isNotBlank(openId) || StringUtils.equals(_clientUserVO.getId(), openId));
-            }
-
-            @Override
-            public boolean checkScope(String scope) {
-                return StringUtils.contains(_clientUserVO.getScope(), scope);
-            }
-        };
     }
 }

@@ -16,7 +16,11 @@
 package net.ymate.module.oauth;
 
 import net.ymate.platform.core.YMP;
-import org.apache.commons.lang.StringUtils;
+import org.apache.oltu.oauth2.common.message.OAuthResponse;
+import org.apache.oltu.oauth2.common.message.types.GrantType;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Set;
 
 /**
  * @author 刘镇 (suninformation@163.com) on 2017/02/26 上午 02:08
@@ -41,111 +45,68 @@ public interface IOAuth {
      */
     boolean isInited();
 
-    IOAuthClientHelper clientHelper(String clientId, String clientSecret) throws Exception;
-
-    IOAuthAuthzHelper authzHelper(String clientId, String uid) throws Exception;
-
-    IOAuthTokenHelper tokenHelper(String clientId, String clientSecret, String code) throws Exception;
-
-    IOAuthTokenHelper tokenHelper(String clientId, String clientSecret, String scope, String uid) throws Exception;
-
-    IOAuthTokenHelper tokenHelper(String clientId, String clientSecret, String scope, String username, String passwd) throws Exception;
-
-    IOAuthTokenHelper tokenHelper(String clientId, String refreshToken) throws Exception;
-
-    IOAuthAccessResourceHelper resourceHelper(String accessToken) throws Exception;
-
-    IOAuthAccessResourceHelper resourceHelper(String accessToken, String openId) throws Exception;
+    /**
+     * 注册OAuth授权作用域处理器
+     *
+     * @param targetClass 目标类型
+     * @throws Exception 可能产生的任何异常
+     */
+    void registerScopeProcessor(Class<? extends IOAuthScopeProcessor> targetClass) throws Exception;
 
     /**
-     * OAuth授权作用域
+     * @param name OAuth授权作用域处理器名称
+     * @param <T>  实例对象类型
+     * @return 获取指定名称的Scope处理器对象，若不存在则返回空
      */
-    final class Scope {
+    <T extends IOAuthScopeProcessor> T getScopeProcessor(String name);
 
-        public static final String SNSAPI_BASE = "snsapi_base";
+    /**
+     * @return 获取Scope名称集合
+     */
+    Set<String> getScopeNames();
 
-        public static final String SNSAPI_USERINFO = "snsapi_userinfo";
+    /**
+     * @param grantType 授权模式枚举类型
+     * @return 获取指定授权模式处理器接口实现
+     */
+    IOAuthGrantProcessor getGrantProcessor(GrantType grantType);
 
-        public static boolean verified(String scope) {
-            return StringUtils.equalsIgnoreCase(scope, IOAuth.Scope.SNSAPI_BASE)
-                    || StringUtils.equalsIgnoreCase(scope, IOAuth.Scope.SNSAPI_USERINFO);
-        }
-    }
+    /**
+     * @param request HttpServletRequest请求对象
+     * @return 验证客户端授权模式请求凭证是否有效，若无效则返回非空OAuthResponse对象
+     * @throws Exception 可能产生的任何异常
+     */
+    OAuthResponse checkClientAccessToken(HttpServletRequest request) throws Exception;
 
+    /**
+     * @param request HttpServletRequest请求对象
+     * @param scope   授权作用域，可选
+     * @return 验证用户授权模式请求凭证是否有效，若无效则返回非空OAuthResponse对象
+     * @throws Exception 可能产生的任何异常
+     */
+    OAuthResponse checkUserAccessToken(HttpServletRequest request, String scope) throws Exception;
+
+    /**
+     * 常量
+     */
     final class Const {
+
+        public static final String SCOPE_SNSAPI_BASE = "snsapi_base";
+
+        public static final String SCOPE_SNSAPI_USERINFO = "snsapi_userinfo";
 
         public static final String ACCESS_TOKEN = "access_token";
 
-        public static final String SCOPE = "scope";
+        public static final String UID = "uid";
 
         public static final String OPEN_ID = "open_id";
+
+        public static final String AUTHORIZED = "authorized";
 
         public static final String INVALID_USER = "invalid_user";
 
         public static final String INVALID_REDIRECT_URI = "invalid_redirect_uri";
 
         public static final String REDIRECT_URI_MISMATCH = "redirect_uri_mismatch";
-    }
-
-    interface IOAuthClientHelper {
-
-        OAuthClient getOAuthClient();
-
-        boolean checkClientId();
-
-        boolean checkClientSecret();
-
-        OAuthToken createOrUpdateAccessToken() throws Exception;
-    }
-
-    interface IOAuthAuthzHelper {
-
-        OAuthClient getOAuthClient();
-
-        OAuthClientUser getOAuthClientUser();
-
-        boolean checkClientId();
-
-        boolean checkUserNeedAuth();
-
-        OAuthCode createOrUpdateAuthCode(String redirectUri, String scope) throws Exception;
-    }
-
-    interface IOAuthTokenHelper {
-
-        OAuthClient getOAuthClient();
-
-        OAuthClientUser getOAuthClientUser();
-
-        OAuthCode getOAuthCode();
-
-        boolean checkClientId();
-
-        boolean checkClientSecret();
-
-        boolean checkAuthCode();
-
-        boolean checkAuthUser();
-
-        boolean isExpiredRefreshToken();
-
-        boolean checkRefreshToken();
-
-        OAuthSnsToken refreshAccessToken() throws Exception;
-
-        OAuthSnsToken createOrUpdateAccessToken() throws Exception;
-    }
-
-    interface IOAuthAccessResourceHelper {
-
-        OAuthClient getOAuthClient();
-
-        OAuthClientUser getOAuthClientUser();
-
-        boolean isExpiredAccessToken();
-
-        boolean checkAccessToken();
-
-        boolean checkScope(String scope);
     }
 }

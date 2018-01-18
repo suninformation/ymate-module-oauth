@@ -10,13 +10,13 @@
         <version>1</version>
     </parent>
 
-    <artifactId>ymate-module-oauth-web</artifactId>
+    <artifactId>ymate-module-oauth-model</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>ymate-module-oauth-web</name>
+    <name>ymate-module-oauth-model</name>
     <url>http://www.ymate.net/</url>
-    <description>YMP OAuth Web Archetype</description>
+    <description>YMP OAuth Model Archetype</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -40,7 +40,7 @@
                         <archive>
                             <manifestSections>
                                 <manifestSection>
-                                    <name>net/ymate/module/oauth/web/</name>
+                                    <name>net/ymate/module/oauth/model/</name>
                                 </manifestSection>
                             </manifestSections>
                             <manifestEntries>
@@ -72,6 +72,13 @@
                     <skipTests>true</skipTests>
                 </configuration>
             </plugin>
+            <!--
+            <plugin>
+                <groupId>net.ymate.maven.plugins</groupId>
+                <artifactId>ymate-maven-plugin</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </plugin>
+            -->
         </plugins>
     </build>
 
@@ -82,22 +89,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>net.ymate.platform</groupId>
-            <artifactId>ymate-platform-webmvc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ymate.framework</groupId>
-            <artifactId>ymate-framework-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ymate.module</groupId>
-            <artifactId>ymate-module-oauth</artifactId>
-            <version>${project.version}</version>
+            <artifactId>ymate-platform-persistence-jdbc</artifactId>
         </dependency>
     </dependencies>
 </project>

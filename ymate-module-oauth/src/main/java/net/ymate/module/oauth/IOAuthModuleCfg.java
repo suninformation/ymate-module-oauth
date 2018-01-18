@@ -15,6 +15,10 @@
  */
 package net.ymate.module.oauth;
 
+import org.apache.oltu.oauth2.common.message.types.GrantType;
+
+import java.util.Set;
+
 /**
  * @author 刘镇 (suninformation@163.com) on 2017/02/26 上午 02:08
  * @version 1.0
@@ -27,29 +31,34 @@ public interface IOAuthModuleCfg {
     int getAccessTokenExpireIn();
 
     /**
+     * @return 返回AccessToken访问凭证最大刷新次数，若为0表示不限制
+     */
+    int getRefreshCountMax();
+
+    /**
+     * @return 返回RefreshToken刷新凭证超时时间, 单位(天), 默认值: 30
+     */
+    int getRefreshTokenExpireIn();
+
+    /**
+     * @return 返回授权码过期时间, 单位(分钟), 默认值: 5
+     */
+    int getAuthorizationCodeExpireIn();
+
+    /**
      * @return 缓存名称前缀, 默认值: ""
      */
     String getCacheNamePrefix();
 
     /**
-     * @return 是否开启SNS用户网页授权服务, 默认值: false
+     * @return 设置开启的授权模式, 多个模式之间用'|'分隔, 默认值: none，可选值范围: [authorization_code|implicit|password|refresh_token|client_credentials|none]
      */
-    boolean isSnsEnabled();
-
-    /**
-     * @return 用户确认授权JSP视图文件路径, 默认值: _views/oauth2/sns-authorization
-     */
-    String getAuthorizationView();
+    Set<GrantType> getAllowGrantTypes();
 
     /**
      * @return Token生成器接口实现
      */
     IOAuthTokenGenerator getTokenGenerator();
-
-    /**
-     * @return 用户身份信息适配器接口实现
-     */
-    IOAuthUserInfoAdapter getUserInfoAdapter();
 
     /**
      * @return 令牌存储适配器接口实现
