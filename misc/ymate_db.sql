@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS `ym_oauth_client`;
 CREATE TABLE `ym_oauth_client` (
   `id` varchar(32) NOT NULL COMMENT '客户端唯一标识',
   `name` varchar(32) NOT NULL COMMENT '客户端名称',
+  `domain` varchar(100) DEFAULT NULL COMMENT '客户端域名',
   `icon_url` varchar(255) DEFAULT NULL COMMENT '客户端LOGO图片URL地址',
   `secret_key` varchar(32) NOT NULL COMMENT '客户端密钥',
   `description` varchar(1000) DEFAULT NULL COMMENT '客户端描述',

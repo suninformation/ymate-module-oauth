@@ -39,6 +39,10 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
     @PropertyState(propertyName = "name")
     private java.lang.String name;
 
+    @Property(name = "domain", length = 100)
+    @PropertyState(propertyName = "domain")
+    private java.lang.String domain;
+
     @Property(name = "icon_url", length = 255)
     @PropertyState(propertyName = "icon_url")
     private java.lang.String iconUrl;
@@ -114,6 +118,7 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
      *
      * @param id
      * @param name
+     * @param domain
      * @param iconUrl
      * @param secretKey
      * @param description
@@ -126,9 +131,10 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
      * @param createTime
      * @param lastModifyTime
      */
-    public OAuthClient(java.lang.String id, java.lang.String name, java.lang.String iconUrl, java.lang.String secretKey, java.lang.String description, java.lang.String accessToken, java.lang.String lastAccessToken, java.lang.Integer expiresIn, java.lang.String ipWhiteList, java.lang.Integer type, java.lang.Integer status, java.lang.Long createTime, java.lang.Long lastModifyTime) {
+    public OAuthClient(java.lang.String id, java.lang.String name, java.lang.String domain, java.lang.String iconUrl, java.lang.String secretKey, java.lang.String description, java.lang.String accessToken, java.lang.String lastAccessToken, java.lang.Integer expiresIn, java.lang.String ipWhiteList, java.lang.Integer type, java.lang.Integer status, java.lang.Long createTime, java.lang.Long lastModifyTime) {
         this.id = id;
         this.name = name;
+        this.domain = domain;
         this.iconUrl = iconUrl;
         this.secretKey = secretKey;
         this.description = description;
@@ -165,6 +171,20 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
      */
     public void setName(java.lang.String name) {
         this.name = name;
+    }
+
+    /**
+     * @return the domain
+     */
+    public java.lang.String getDomain() {
+        return domain;
+    }
+
+    /**
+     * @param domain the domain to set
+     */
+    public void setDomain(java.lang.String domain) {
+        this.domain = domain;
     }
 
     /**
@@ -396,6 +416,15 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
             return this;
         }
 
+        public java.lang.String domain() {
+            return _model.getDomain();
+        }
+
+        public OauthClientBuilder domain(java.lang.String domain) {
+            _model.setDomain(domain);
+            return this;
+        }
+
         public java.lang.String iconUrl() {
             return _model.getIconUrl();
         }
@@ -498,11 +527,12 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
     }
 
     /**
-     * OAuthClient 字段常量表
+     * OauthClient 字段常量表
      */
     public class FIELDS {
         public static final String ID = "id";
         public static final String NAME = "name";
+        public static final String DOMAIN = "domain";
         public static final String ICON_URL = "icon_url";
         public static final String SECRET_KEY = "secret_key";
         public static final String DESCRIPTION = "description";
