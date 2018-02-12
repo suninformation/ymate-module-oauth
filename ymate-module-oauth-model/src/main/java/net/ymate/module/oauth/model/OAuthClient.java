@@ -346,23 +346,23 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
     // Chain
     //
 
-    public static OauthClientBuilder builder() {
-        return new OauthClientBuilder();
+    public static OAuthClientBuilder builder() {
+        return new OAuthClientBuilder();
     }
 
-    public OauthClientBuilder bind() {
-        return new OauthClientBuilder(this);
+    public OAuthClientBuilder bind() {
+        return new OAuthClientBuilder(this);
     }
 
-    public static class OauthClientBuilder {
+    public static class OAuthClientBuilder {
 
         private OAuthClient _model;
 
-        public OauthClientBuilder() {
+        public OAuthClientBuilder() {
             _model = new OAuthClient();
         }
 
-        public OauthClientBuilder(OAuthClient model) {
+        public OAuthClientBuilder(OAuthClient model) {
             _model = model;
         }
 
@@ -375,7 +375,7 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
             return _model.getConnectionHolder();
         }
 
-        public OauthClientBuilder connectionHolder(IConnectionHolder connectionHolder) {
+        public OAuthClientBuilder connectionHolder(IConnectionHolder connectionHolder) {
             _model.setConnectionHolder(connectionHolder);
             return this;
         }
@@ -384,7 +384,7 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
             return _model.getDataSourceName();
         }
 
-        public OauthClientBuilder dataSourceName(String dsName) {
+        public OAuthClientBuilder dataSourceName(String dsName) {
             _model.setDataSourceName(dsName);
             return this;
         }
@@ -393,7 +393,7 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
             return _model.getShardingable();
         }
 
-        public OauthClientBuilder shardingable(IShardingable shardingable) {
+        public OAuthClientBuilder shardingable(IShardingable shardingable) {
             _model.setShardingable(shardingable);
             return this;
         }
@@ -402,7 +402,7 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
             return _model.getId();
         }
 
-        public OauthClientBuilder id(java.lang.String id) {
+        public OAuthClientBuilder id(java.lang.String id) {
             _model.setId(id);
             return this;
         }
@@ -411,7 +411,7 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
             return _model.getName();
         }
 
-        public OauthClientBuilder name(java.lang.String name) {
+        public OAuthClientBuilder name(java.lang.String name) {
             _model.setName(name);
             return this;
         }
@@ -420,7 +420,7 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
             return _model.getDomain();
         }
 
-        public OauthClientBuilder domain(java.lang.String domain) {
+        public OAuthClientBuilder domain(java.lang.String domain) {
             _model.setDomain(domain);
             return this;
         }
@@ -429,7 +429,7 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
             return _model.getIconUrl();
         }
 
-        public OauthClientBuilder iconUrl(java.lang.String iconUrl) {
+        public OAuthClientBuilder iconUrl(java.lang.String iconUrl) {
             _model.setIconUrl(iconUrl);
             return this;
         }
@@ -438,7 +438,7 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
             return _model.getSecretKey();
         }
 
-        public OauthClientBuilder secretKey(java.lang.String secretKey) {
+        public OAuthClientBuilder secretKey(java.lang.String secretKey) {
             _model.setSecretKey(secretKey);
             return this;
         }
@@ -447,7 +447,7 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
             return _model.getDescription();
         }
 
-        public OauthClientBuilder description(java.lang.String description) {
+        public OAuthClientBuilder description(java.lang.String description) {
             _model.setDescription(description);
             return this;
         }
@@ -456,7 +456,7 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
             return _model.getAccessToken();
         }
 
-        public OauthClientBuilder accessToken(java.lang.String accessToken) {
+        public OAuthClientBuilder accessToken(java.lang.String accessToken) {
             _model.setAccessToken(accessToken);
             return this;
         }
@@ -465,7 +465,7 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
             return _model.getLastAccessToken();
         }
 
-        public OauthClientBuilder lastAccessToken(java.lang.String lastAccessToken) {
+        public OAuthClientBuilder lastAccessToken(java.lang.String lastAccessToken) {
             _model.setLastAccessToken(lastAccessToken);
             return this;
         }
@@ -474,7 +474,7 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
             return _model.getExpiresIn();
         }
 
-        public OauthClientBuilder expiresIn(java.lang.Integer expiresIn) {
+        public OAuthClientBuilder expiresIn(java.lang.Integer expiresIn) {
             _model.setExpiresIn(expiresIn);
             return this;
         }
@@ -483,7 +483,7 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
             return _model.getIpWhiteList();
         }
 
-        public OauthClientBuilder ipWhiteList(java.lang.String ipWhiteList) {
+        public OAuthClientBuilder ipWhiteList(java.lang.String ipWhiteList) {
             _model.setIpWhiteList(ipWhiteList);
             return this;
         }
@@ -492,7 +492,7 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
             return _model.getType();
         }
 
-        public OauthClientBuilder type(java.lang.Integer type) {
+        public OAuthClientBuilder type(java.lang.Integer type) {
             _model.setType(type);
             return this;
         }
@@ -501,7 +501,7 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
             return _model.getStatus();
         }
 
-        public OauthClientBuilder status(java.lang.Integer status) {
+        public OAuthClientBuilder status(java.lang.Integer status) {
             _model.setStatus(status);
             return this;
         }
@@ -510,7 +510,7 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
             return _model.getCreateTime();
         }
 
-        public OauthClientBuilder createTime(java.lang.Long createTime) {
+        public OAuthClientBuilder createTime(java.lang.Long createTime) {
             _model.setCreateTime(createTime);
             return this;
         }
@@ -519,7 +519,7 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
             return _model.getLastModifyTime();
         }
 
-        public OauthClientBuilder lastModifyTime(java.lang.Long lastModifyTime) {
+        public OAuthClientBuilder lastModifyTime(java.lang.Long lastModifyTime) {
             _model.setLastModifyTime(lastModifyTime);
             return this;
         }

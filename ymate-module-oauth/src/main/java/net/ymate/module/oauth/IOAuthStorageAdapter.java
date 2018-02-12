@@ -85,5 +85,5 @@ public interface IOAuthStorageAdapter extends IInitializable<IOAuth> {
 
     OAuthUserInfoBean findUserInfo(String clientId, String openId) throws Exception;
 
-    OAuthClientUserBean saveOrUpdateUserAccessToken(String clientId, String uid, String scope, String accessToken, String lastAccessToken, String refreshToken, int expiresIn) throws Exception;
+    OAuthClientUserBean saveOrUpdateUserAccessToken(String clientId, String uid, String scope, String accessToken, String lastAccessToken, String refreshToken, int expiresIn, boolean refresh) throws Exception;
 }

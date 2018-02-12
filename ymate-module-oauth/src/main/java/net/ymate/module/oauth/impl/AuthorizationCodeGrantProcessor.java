@@ -77,7 +77,7 @@ public class AuthorizationCodeGrantProcessor extends AbstractGrantProcessor {
                         _clientUser.setRefreshCount(0);
                         _clientUser.setRefreshToken(getOwner().getModuleCfg().getTokenGenerator().refreshToken());
                         //
-                        _clientUser = saveOrUpdateToken(_clientUser);
+                        _clientUser = saveOrUpdateToken(_clientUser, false);
                         //
                         OAuthResponse.OAuthResponseBuilder _builder = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
                                 .setAccessToken(_clientUser.getAccessToken())

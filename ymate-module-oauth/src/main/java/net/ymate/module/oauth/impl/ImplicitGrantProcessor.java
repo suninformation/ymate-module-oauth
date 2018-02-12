@@ -139,7 +139,7 @@ public class ImplicitGrantProcessor extends AbstractGrantProcessor {
                     _clientUser.setRefreshCount(0);
                     _clientUser.setExpiresIn(getOwner().getModuleCfg().getAccessTokenExpireIn());
                 }
-                _clientUser = saveOrUpdateToken(_clientUser);
+                _clientUser = saveOrUpdateToken(_clientUser, false);
                 //
                 OAuthResponse.OAuthResponseBuilder _builder = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
                         .setAccessToken(_clientUser.getAccessToken())

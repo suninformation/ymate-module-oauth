@@ -306,23 +306,23 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
     // Chain
     //
 
-    public static OauthUserBuilder builder() {
-        return new OauthUserBuilder();
+    public static OAuthUserBuilder builder() {
+        return new OAuthUserBuilder();
     }
 
-    public OauthUserBuilder bind() {
-        return new OauthUserBuilder(this);
+    public OAuthUserBuilder bind() {
+        return new OAuthUserBuilder(this);
     }
 
-    public static class OauthUserBuilder {
+    public static class OAuthUserBuilder {
 
         private OAuthUser _model;
 
-        public OauthUserBuilder() {
+        public OAuthUserBuilder() {
             _model = new OAuthUser();
         }
 
-        public OauthUserBuilder(OAuthUser model) {
+        public OAuthUserBuilder(OAuthUser model) {
             _model = model;
         }
 
@@ -335,7 +335,7 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
             return _model.getConnectionHolder();
         }
 
-        public OauthUserBuilder connectionHolder(IConnectionHolder connectionHolder) {
+        public OAuthUserBuilder connectionHolder(IConnectionHolder connectionHolder) {
             _model.setConnectionHolder(connectionHolder);
             return this;
         }
@@ -344,7 +344,7 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
             return _model.getDataSourceName();
         }
 
-        public OauthUserBuilder dataSourceName(String dsName) {
+        public OAuthUserBuilder dataSourceName(String dsName) {
             _model.setDataSourceName(dsName);
             return this;
         }
@@ -353,7 +353,7 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
             return _model.getShardingable();
         }
 
-        public OauthUserBuilder shardingable(IShardingable shardingable) {
+        public OAuthUserBuilder shardingable(IShardingable shardingable) {
             _model.setShardingable(shardingable);
             return this;
         }
@@ -362,7 +362,7 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
             return _model.getId();
         }
 
-        public OauthUserBuilder id(java.lang.String id) {
+        public OAuthUserBuilder id(java.lang.String id) {
             _model.setId(id);
             return this;
         }
@@ -371,7 +371,7 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
             return _model.getUid();
         }
 
-        public OauthUserBuilder uid(java.lang.String uid) {
+        public OAuthUserBuilder uid(java.lang.String uid) {
             _model.setUid(uid);
             return this;
         }
@@ -380,7 +380,7 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
             return _model.getClientId();
         }
 
-        public OauthUserBuilder clientId(java.lang.String clientId) {
+        public OAuthUserBuilder clientId(java.lang.String clientId) {
             _model.setClientId(clientId);
             return this;
         }
@@ -389,7 +389,7 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
             return _model.getIsAuthorized();
         }
 
-        public OauthUserBuilder isAuthorized(java.lang.Integer isAuthorized) {
+        public OAuthUserBuilder isAuthorized(java.lang.Integer isAuthorized) {
             _model.setIsAuthorized(isAuthorized);
             return this;
         }
@@ -398,7 +398,7 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
             return _model.getAccessToken();
         }
 
-        public OauthUserBuilder accessToken(java.lang.String accessToken) {
+        public OAuthUserBuilder accessToken(java.lang.String accessToken) {
             _model.setAccessToken(accessToken);
             return this;
         }
@@ -407,7 +407,7 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
             return _model.getLastAccessToken();
         }
 
-        public OauthUserBuilder lastAccessToken(java.lang.String lastAccessToken) {
+        public OAuthUserBuilder lastAccessToken(java.lang.String lastAccessToken) {
             _model.setLastAccessToken(lastAccessToken);
             return this;
         }
@@ -416,7 +416,7 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
             return _model.getRefreshToken();
         }
 
-        public OauthUserBuilder refreshToken(java.lang.String refreshToken) {
+        public OAuthUserBuilder refreshToken(java.lang.String refreshToken) {
             _model.setRefreshToken(refreshToken);
             return this;
         }
@@ -425,7 +425,7 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
             return _model.getRefreshCount();
         }
 
-        public OauthUserBuilder refreshCount(java.lang.Integer refreshCount) {
+        public OAuthUserBuilder refreshCount(java.lang.Integer refreshCount) {
             _model.setRefreshCount(refreshCount);
             return this;
         }
@@ -434,7 +434,7 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
             return _model.getExpiresIn();
         }
 
-        public OauthUserBuilder expiresIn(java.lang.Integer expiresIn) {
+        public OAuthUserBuilder expiresIn(java.lang.Integer expiresIn) {
             _model.setExpiresIn(expiresIn);
             return this;
         }
@@ -443,7 +443,7 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
             return _model.getScope();
         }
 
-        public OauthUserBuilder scope(java.lang.String scope) {
+        public OAuthUserBuilder scope(java.lang.String scope) {
             _model.setScope(scope);
             return this;
         }
@@ -452,7 +452,7 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
             return _model.getCreateTime();
         }
 
-        public OauthUserBuilder createTime(java.lang.Long createTime) {
+        public OAuthUserBuilder createTime(java.lang.Long createTime) {
             _model.setCreateTime(createTime);
             return this;
         }
@@ -461,7 +461,7 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
             return _model.getLastModifyTime();
         }
 
-        public OauthUserBuilder lastModifyTime(java.lang.Long lastModifyTime) {
+        public OAuthUserBuilder lastModifyTime(java.lang.Long lastModifyTime) {
             _model.setLastModifyTime(lastModifyTime);
             return this;
         }

@@ -65,7 +65,7 @@ public class RefreshTokenGrantProcessor extends AbstractGrantProcessor {
                     _clientUser.setExpiresIn(getOwner().getModuleCfg().getAccessTokenExpireIn());
                     _clientUser.setRefreshToken(getOwner().getModuleCfg().getTokenGenerator().refreshToken());
                     //
-                    _clientUser = saveOrUpdateToken(_clientUser);
+                    _clientUser = saveOrUpdateToken(_clientUser, true);
                     //
                     OAuthResponse.OAuthResponseBuilder _builder = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
                             .setAccessToken(_clientUser.getAccessToken())
