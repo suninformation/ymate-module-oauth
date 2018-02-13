@@ -50,7 +50,6 @@ public class UserAccessTokenCheckInterceptor extends AbstractInterceptor {
                 if (_tokenBean != null) {
                     IOAuthScopeProcessor _processor = OAuth.get().getScopeProcessor(_scope.value());
                     if (_processor != null) {
-                        _processor.init(OAuth.get());
                         _response = _processor.process(_request, _tokenBean);
                     }
                 }

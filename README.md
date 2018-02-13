@@ -19,7 +19,7 @@
     <dependency>
         <groupId>net.ymate.module</groupId>
         <artifactId>ymate-module-oauth</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.0</version>
     </dependency>
 
 #### 模块配置参数说明
@@ -31,38 +31,47 @@
     # AccessToken访问凭证超时时间, 单位(秒), 默认值: 7200(两小时)
     ymp.configs.module.oauth.access_token_expire_in=
     
+    # AccessToken访问凭证最大刷新次数，若为0表示不限制
+    ymp.configs.module.oauth.refresh_count_max=
+    
+    # RefreshToken刷新凭证超时时间, 单位(天), 默认值: 30
+    ymp.configs.module.oauth.refresh_token_expire_in=
+    
+    # 授权码过期时间, 单位(分钟), 默认值: 5
+    ymp.configs.module.oauth.authorization_code_expire_in=
+    
     # 缓存名称前缀, 默认值: ""
     ymp.configs.module.oauth.cache_name_prefix=
     
-    # 是否开启SNS用户网页授权服务, 默认值: false
-    ymp.configs.module.oauth.sns_enabled=
-    
-    # 用户确认授权JSP视图文件路径, 默认值: _views/oauth2/sns-authorization
-    ymp.configs.module.oauth.authorization_view=
+    # 设置开启的授权模式, 多个模式之间用'|'分隔, 默认值: none，可选值范围: [authorization_code|implicit|password|refresh_token|client_credentials|none]
+    ymp.configs.module.oauth.allow_grant_types=
     
     # Token生成器接口实现, 默认值: net.ymate.module.oauth.impl.DefaultTokenGenerator
     ymp.configs.module.oauth.token_generator_class=
     
-    # 用户身份信息适配器接口实现, 默认值: 空
-    ymp.configs.module.oauth.userinfo_adapter_class=
-    
     # OAuth令牌存储适配器接口实现, 默认值: 空
     ymp.configs.module.oauth.storage_adapter_class=
+    
+    # OAuth用户授权处理器接口实现, 默认值: net.ymate.module.oauth.web.impl.DefaultNeedAuthorizationProcessor
+    ymp.params.module.oauth.need_authorization_processor_class=
 
 #### 示例代码
 
 - 通过拦截器限制接口请求`scope`的权限必须是`snsapi_userinfo`：
 
         @RequestMapping("/sns/userinfo")
-        @Before(SnsAccessTokenCheckInterceptor.class)
-        @ContextParam(@ParamItem(key = IOAuth.Const.SCOPE, value = IOAuth.Scope.SNSAPI_USERINFO))
+        @Before(UserAccessTokenCheckInterceptor.class)
+        @OAuthScope(IOAuth.Const.SCOPE_SNSAPI_USERINFO)
         public IView userinfo(@RequestParam(IOAuth.Const.ACCESS_TOKEN) String accountToken, @RequestParam(IOAuth.Const.OPEN_ID) String openId) throws Exception {
-            try {
-                return View.jsonView(OAuth.get().getModuleCfg().getUserInfoAdapter().getUserInfo(OAuth.get().bindAccessResourceHelper(accountToken, openId).getOAuthClientUser().getUid()));
-            } catch (Exception e) {
-                OAuthResponse _response = __responseBadRequest(IOAuth.Const.INVALID_USER);
-                return new HttpStatusView(_response.getResponseStatus(), false).writeBody(_response.getBody());
+            OAuthResponse _response = null;
+            IOAuthScopeProcessor _processor = OAuth.get().getScopeProcessor(_scope.value());
+            if (_processor != null) {
+                _response = _processor.process(WebContext.getRequest(), (OAuthTokenBean) WebContext.getRequest().getAttribute(OAuthTokenBean.class.getName()));
             }
+            if (_response == null) {
+                _response = OAuthResponseUtils.badRequest(OAuthError.ResourceResponse.INVALID_REQUEST);
+            }
+            return new HttpStatusView(_response.getResponseStatus(), false).writeBody(_response.getBody());
         }
 
 - 客户端模式：

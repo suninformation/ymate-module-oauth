@@ -82,8 +82,17 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>net.ymate.platform</groupId>
-            <artifactId>ymate-platform-cache</artifactId>
+            <artifactId>ymate-platform-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ymate.framework</groupId>
+            <artifactId>ymate-framework-core</artifactId>
         </dependency>
         <dependency>
             <groupId>net.ymate.module</groupId>

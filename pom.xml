@@ -17,7 +17,6 @@
         <module>ymate-module-oauth</module>
         <module>ymate-module-oauth-impl</module>
         <module>ymate-module-oauth-model</module>
-        <module>ymate-module-oauth-web</module>
     </modules>
 
     <properties>

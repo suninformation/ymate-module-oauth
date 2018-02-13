@@ -19,12 +19,14 @@ import net.ymate.module.oauth.base.OAuthClientBean;
 import net.ymate.module.oauth.base.OAuthClientUserBean;
 import net.ymate.module.oauth.base.OAuthCodeBean;
 import net.ymate.module.oauth.base.OAuthTokenBean;
+import net.ymate.module.oauth.support.UserAuthenticationException;
 import net.ymate.platform.core.lang.BlurObject;
 import net.ymate.platform.core.util.RuntimeUtils;
 import org.apache.commons.lang.NullArgumentException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -96,12 +98,12 @@ public abstract class AbstractGrantProcessor implements IOAuthGrantProcessor {
         return __clientUserBean;
     }
 
-    protected OAuthClientUserBean getClientUser(String clientId, String username, String password) {
+    protected OAuthClientUserBean getClientUser(String clientId, String username, String password) throws OAuthProblemException {
         if (__clientUserBean == null) {
             try {
                 __clientUserBean = __owner.getModuleCfg().getTokenStorageAdapter().findUser(clientId, username, password);
-            } catch (Exception e) {
-                _LOG.warn("", RuntimeUtils.unwrapThrow(e));
+            } catch (UserAuthenticationException e) {
+                throw OAuthProblemException.error(String.valueOf(e.getCode()), e.getMessage());
             }
         }
         return __clientUserBean;
