@@ -63,5 +63,10 @@ public interface IOAuthModuleCfg {
     /**
      * @return 令牌存储适配器接口实现
      */
-    IOAuthStorageAdapter getTokenStorageAdapter();
+    IOAuthStorageAdapter getStorageAdapter();
+
+    /**
+     * @return 错误信息响应适配器接口实现
+     */
+    IOAuthErrorAdapter getErrorAdapter();
 }

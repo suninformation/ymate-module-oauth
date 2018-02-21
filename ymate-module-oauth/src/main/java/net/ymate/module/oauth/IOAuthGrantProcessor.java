@@ -15,8 +15,6 @@
  */
 package net.ymate.module.oauth;
 
-import net.ymate.module.oauth.support.OAuthResponseUtils;
-import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,7 +30,7 @@ public interface IOAuthGrantProcessor {
     IOAuthGrantProcessor UNSUPPORTED_GRANT_TYPE = new IOAuthGrantProcessor() {
         @Override
         public OAuthResponse process(HttpServletRequest request) throws Exception {
-            return OAuthResponseUtils.badRequest(OAuthError.TokenResponse.UNSUPPORTED_GRANT_TYPE);
+            return OAuth.get().getModuleCfg().getErrorAdapter().onError(IOAuth.ErrorType.UNSUPPORTED_GRANT_TYPE);
         }
 
         @Override

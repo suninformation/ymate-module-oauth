@@ -20,7 +20,6 @@ import net.ymate.module.oauth.base.OAuthClientUserBean;
 import net.ymate.module.oauth.base.OAuthTokenBean;
 import net.ymate.module.oauth.handle.OAuthScopeHandler;
 import net.ymate.module.oauth.impl.*;
-import net.ymate.module.oauth.support.OAuthResponseUtils;
 import net.ymate.platform.core.Version;
 import net.ymate.platform.core.YMP;
 import net.ymate.platform.core.beans.BeanMeta;
@@ -29,7 +28,6 @@ import net.ymate.platform.core.module.annotation.Module;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
@@ -90,8 +88,8 @@ public class OAuth implements IModule, IOAuth {
             __owner.registerHandler(OAuthScope.class, new OAuthScopeHandler(this));
             __moduleCfg = new DefaultModuleCfg(owner);
             //
-            if (__moduleCfg.getTokenStorageAdapter() != null) {
-                __moduleCfg.getTokenStorageAdapter().init(this);
+            if (__moduleCfg.getStorageAdapter() != null) {
+                __moduleCfg.getStorageAdapter().init(this);
             }
             //
             __inited = true;
@@ -153,30 +151,30 @@ public class OAuth implements IModule, IOAuth {
                         _process = new ClientCredentialsGrantProcessor(this);
                         break;
                     default:
-                        break;
+                        _process = IOAuthGrantProcessor.UNSUPPORTED_GRANT_TYPE;
                 }
             }
         }
-        return _process != null ? _process : IOAuthGrantProcessor.UNSUPPORTED_GRANT_TYPE;
+        return _process;
     }
 
     @Override
     public OAuthResponse checkClientAccessToken(HttpServletRequest request) throws Exception {
         OAuthResponse _response = null;
         try {
-            OAuthAccessResourceRequest _oauthRequest = new OAuthAccessResourceRequest(request, ParameterStyle.QUERY, ParameterStyle.BODY, ParameterStyle.HEADER);
-            OAuthTokenBean _tokenBean = __moduleCfg.getTokenStorageAdapter().findClientByAccessToken(_oauthRequest.getAccessToken());
+            OAuthAccessResourceRequest _oauthRequest = new OAuthAccessResourceRequest(request, ParameterStyle.QUERY);
+            OAuthTokenBean _tokenBean = __moduleCfg.getStorageAdapter().findClientByAccessToken(_oauthRequest.getAccessToken());
             //
             if (_tokenBean == null) {
-                _response = OAuthResponseUtils.unauthorizedClient(OAuthError.ResourceResponse.INVALID_TOKEN);
+                _response = __moduleCfg.getErrorAdapter().onError(ErrorType.INVALID_TOKEN);
             } else if (!_tokenBean.checkAccessToken()) {
-                _response = OAuthResponseUtils.unauthorizedClient(OAuthError.ResourceResponse.EXPIRED_TOKEN);
+                _response = __moduleCfg.getErrorAdapter().onError(ErrorType.EXPIRED_TOKEN);
             } else {
                 request.setAttribute(OAuthTokenBean.class.getName(), _tokenBean);
                 request.setAttribute(Const.ACCESS_TOKEN, _oauthRequest.getAccessToken());
             }
         } catch (OAuthProblemException e) {
-            _response = OAuthResponseUtils.badRequestError(e);
+            _response = __moduleCfg.getErrorAdapter().onError(e);
         }
         return _response;
     }
@@ -186,20 +184,20 @@ public class OAuth implements IModule, IOAuth {
         OAuthResponse _response = null;
         try {
             OAuthAccessResourceRequest _oauthRequest = new OAuthAccessResourceRequest(request, ParameterStyle.QUERY);
-            OAuthClientUserBean _tokenBean = __moduleCfg.getTokenStorageAdapter().findUserByAccessToken(_oauthRequest.getAccessToken());
+            OAuthClientUserBean _tokenBean = __moduleCfg.getStorageAdapter().findUserByAccessToken(_oauthRequest.getAccessToken());
             //
             if (_tokenBean == null) {
-                _response = OAuthResponseUtils.unauthorizedClient(OAuthError.ResourceResponse.INVALID_TOKEN);
+                _response = __moduleCfg.getErrorAdapter().onError(ErrorType.INVALID_TOKEN);
             } else if (!_tokenBean.checkAccessToken()) {
-                _response = OAuthResponseUtils.unauthorizedClient(OAuthError.ResourceResponse.EXPIRED_TOKEN);
+                _response = __moduleCfg.getErrorAdapter().onError(ErrorType.EXPIRED_TOKEN);
             } else if (StringUtils.isNotBlank(scope) && !_tokenBean.containsScope(Collections.singleton(scope))) {
-                _response = OAuthResponseUtils.unauthorizedClient(OAuthError.ResourceResponse.INSUFFICIENT_SCOPE);
+                _response = __moduleCfg.getErrorAdapter().onError(ErrorType.INSUFFICIENT_SCOPE);
             } else {
                 request.setAttribute(OAuthTokenBean.class.getName(), _tokenBean);
                 request.setAttribute(Const.ACCESS_TOKEN, _oauthRequest.getAccessToken());
             }
         } catch (OAuthProblemException e) {
-            _response = OAuthResponseUtils.badRequestError(e);
+            _response = __moduleCfg.getErrorAdapter().onError(e);
         }
         return _response;
     }
@@ -209,8 +207,8 @@ public class OAuth implements IModule, IOAuth {
         if (__inited) {
             __inited = false;
             //
-            if (__moduleCfg.getTokenStorageAdapter() != null) {
-                __moduleCfg.getTokenStorageAdapter().destroy();
+            if (__moduleCfg.getStorageAdapter() != null) {
+                __moduleCfg.getStorageAdapter().destroy();
             }
             //
             __moduleCfg = null;

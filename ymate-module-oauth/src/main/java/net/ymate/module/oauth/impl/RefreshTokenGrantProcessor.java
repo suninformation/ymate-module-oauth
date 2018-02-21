@@ -22,7 +22,6 @@ import net.ymate.module.oauth.base.OAuthClientUserBean;
 import net.ymate.module.oauth.support.OAuthResponseUtils;
 import org.apache.oltu.oauth2.as.request.OAuthTokenRequest;
 import org.apache.oltu.oauth2.as.response.OAuthASResponse;
-import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 
@@ -48,17 +47,17 @@ public class RefreshTokenGrantProcessor extends AbstractGrantProcessor {
             OAuthClientBean _client = getClient(_tokenRequest.getClientId());
             OAuthClientUserBean _clientUser = getClientUser(_tokenRequest.getClientId(), _tokenRequest.getRefreshToken(), IdType.REFRESH_TOKEN);
             if (_client == null) {
-                _response = OAuthResponseUtils.badRequest(OAuthError.TokenResponse.INVALID_CLIENT);
+                _response = buildError(IOAuth.ErrorType.INVALID_CLIENT);
             } else if (_clientUser == null) {
-                _response = OAuthResponseUtils.badRequest(OAuthError.ResourceResponse.INVALID_TOKEN);
+                _response = buildError(IOAuth.ErrorType.INVALID_TOKEN);
             } else {
                 int _refreshCountMax = getOwner().getModuleCfg().getRefreshCountMax();
                 int _refreshTokenExpireIn = getOwner().getModuleCfg().getRefreshTokenExpireIn();
                 //
                 if (!_clientUser.checkRefreshToken(_refreshCountMax, _refreshTokenExpireIn)) {
-                    _response = OAuthResponseUtils.badRequest(OAuthError.ResourceResponse.EXPIRED_TOKEN);
+                    _response = buildError(IOAuth.ErrorType.EXPIRED_TOKEN);
                 } else if (!_clientUser.checkScope(_tokenRequest.getParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_SCOPE))) {
-                    _response = OAuthResponseUtils.badRequest(OAuthError.ResourceResponse.INSUFFICIENT_SCOPE);
+                    _response = buildError(IOAuth.ErrorType.INSUFFICIENT_SCOPE);
                 } else {
                     _clientUser.setLastAccessToken(_clientUser.getAccessToken());
                     _clientUser.setAccessToken(getOwner().getModuleCfg().getTokenGenerator().accessToken());
@@ -73,11 +72,11 @@ public class RefreshTokenGrantProcessor extends AbstractGrantProcessor {
                             .setRefreshToken(_clientUser.getRefreshToken())
                             .setScope(_clientUser.getScope())
                             .setParam(IOAuth.Const.OPEN_ID, _clientUser.getOpenId());
-                    _response = OAuthResponseUtils.appendParams(getParams(), _builder).buildJSONMessage();
+                    _response = OAuthResponseUtils.appendParams(_clientUser.getAttributes(), OAuthResponseUtils.appendParams(getParams(), _builder)).buildJSONMessage();
                 }
             }
         } catch (OAuthProblemException e) {
-            _response = OAuthResponseUtils.badRequestError(e);
+            _response = buildError(e);
         }
         return _response;
     }

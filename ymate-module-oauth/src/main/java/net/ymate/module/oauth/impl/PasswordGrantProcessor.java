@@ -23,7 +23,6 @@ import net.ymate.module.oauth.support.OAuthResponseUtils;
 import org.apache.oltu.oauth2.as.request.OAuthTokenRequest;
 import org.apache.oltu.oauth2.as.response.OAuthASResponse;
 import org.apache.oltu.oauth2.common.OAuth;
-import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 
@@ -52,17 +51,17 @@ public class PasswordGrantProcessor extends AbstractGrantProcessor {
                 _scopes.remove(IOAuth.Const.SCOPE_SNSAPI_BASE);
             }
             if (!getOwner().getScopeNames().containsAll(_scopes)) {
-                _response = OAuthResponseUtils.badRequest(OAuthError.CodeResponse.INVALID_SCOPE);
+                _response = buildError(IOAuth.ErrorType.INVALID_SCOPE);
             } else {
                 OAuthClientBean _client = getClient(_tokenRequest.getClientId());
                 if (_client == null) {
-                    _response = OAuthResponseUtils.badRequest(OAuthError.TokenResponse.INVALID_CLIENT);
+                    _response = buildError(IOAuth.ErrorType.INVALID_CLIENT);
                 } else if (!_client.checkSecret(_tokenRequest.getClientSecret())) {
-                    _response = OAuthResponseUtils.unauthorizedClient();
+                    _response = buildError(IOAuth.ErrorType.UNAUTHORIZED_CLIENT);
                 } else {
                     OAuthClientUserBean _clientUser = getClientUser(_tokenRequest.getClientId(), _tokenRequest.getUsername(), _tokenRequest.getPassword());
                     if (_clientUser == null) {
-                        _response = OAuthResponseUtils.badRequest(IOAuth.Const.INVALID_USER);
+                        _response = buildError(IOAuth.ErrorType.INVALID_USER);
                     } else {
                         _clientUser.setClientId(_tokenRequest.getClientId());
                         _clientUser.setScope(_tokenRequest.getParam(OAuth.OAUTH_SCOPE));
@@ -80,12 +79,12 @@ public class PasswordGrantProcessor extends AbstractGrantProcessor {
                                 .setRefreshToken(_clientUser.getRefreshToken())
                                 .setScope(_clientUser.getScope())
                                 .setParam(IOAuth.Const.OPEN_ID, _clientUser.getOpenId());
-                        _response = OAuthResponseUtils.appendParams(getParams(), _builder).buildJSONMessage();
+                        _response = OAuthResponseUtils.appendParams(_clientUser.getAttributes(), OAuthResponseUtils.appendParams(getParams(), _builder)).buildJSONMessage();
                     }
                 }
             }
         } catch (OAuthProblemException e) {
-            _response = OAuthResponseUtils.badRequestError(e);
+            _response = buildError(e);
         }
         return _response;
     }

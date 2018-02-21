@@ -27,6 +27,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
+import org.apache.oltu.oauth2.common.message.OAuthResponse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -64,10 +65,18 @@ public abstract class AbstractGrantProcessor implements IOAuthGrantProcessor {
         return BlurObject.bind(__params.get(key));
     }
 
+    protected OAuthResponse buildError(IOAuth.ErrorType errorType) throws Exception {
+        return __owner.getModuleCfg().getErrorAdapter().onError(errorType);
+    }
+
+    protected OAuthResponse buildError(OAuthProblemException e) throws Exception {
+        return __owner.getModuleCfg().getErrorAdapter().onError(e);
+    }
+
     protected OAuthClientBean getClient(String clientId) {
         if (__clientBean == null) {
             try {
-                __clientBean = __owner.getModuleCfg().getTokenStorageAdapter().findClient(clientId);
+                __clientBean = __owner.getModuleCfg().getStorageAdapter().findClient(clientId);
             } catch (Exception e) {
                 _LOG.warn("", RuntimeUtils.unwrapThrow(e));
             }
@@ -80,13 +89,13 @@ public abstract class AbstractGrantProcessor implements IOAuthGrantProcessor {
             try {
                 switch (idType) {
                     case REFRESH_TOKEN:
-                        __clientUserBean = __owner.getModuleCfg().getTokenStorageAdapter().findUserByRefreshToken(clientId, id);
+                        __clientUserBean = __owner.getModuleCfg().getStorageAdapter().findUserByRefreshToken(clientId, id);
                         break;
                     case ACCESS_TOKEN:
-                        __clientUserBean = __owner.getModuleCfg().getTokenStorageAdapter().findUserByAccessToken(id);
+                        __clientUserBean = __owner.getModuleCfg().getStorageAdapter().findUserByAccessToken(id);
                         break;
                     case UID:
-                        __clientUserBean = __owner.getModuleCfg().getTokenStorageAdapter().findUser(clientId, id);
+                        __clientUserBean = __owner.getModuleCfg().getStorageAdapter().findUser(clientId, id);
                         break;
                     default:
                         break;
@@ -101,7 +110,7 @@ public abstract class AbstractGrantProcessor implements IOAuthGrantProcessor {
     protected OAuthClientUserBean getClientUser(String clientId, String username, String password) throws OAuthProblemException {
         if (__clientUserBean == null) {
             try {
-                __clientUserBean = __owner.getModuleCfg().getTokenStorageAdapter().findUser(clientId, username, password);
+                __clientUserBean = __owner.getModuleCfg().getStorageAdapter().findUser(clientId, username, password);
             } catch (UserAuthenticationException e) {
                 throw OAuthProblemException.error(String.valueOf(e.getCode()), e.getMessage());
             }
@@ -110,7 +119,7 @@ public abstract class AbstractGrantProcessor implements IOAuthGrantProcessor {
     }
 
     protected OAuthCodeBean getCode(String clientId, String code) throws Exception {
-        return __owner.getModuleCfg().getTokenStorageAdapter().findCode(clientId, code);
+        return __owner.getModuleCfg().getStorageAdapter().findCode(clientId, code);
     }
 
     private void __doCheckTokenBean(OAuthTokenBean tokenBean) {
@@ -130,7 +139,7 @@ public abstract class AbstractGrantProcessor implements IOAuthGrantProcessor {
         //
         client.setLastModifyTime(System.currentTimeMillis());
         //
-        return __owner.getModuleCfg().getTokenStorageAdapter().saveOrUpdateClientAccessToken(client.getClientId(), client.getAccessToken(), client.getLastAccessToken(), client.getExpiresIn());
+        return __owner.getModuleCfg().getStorageAdapter().saveOrUpdateClientAccessToken(client.getClientId(), client.getAccessToken(), client.getLastAccessToken(), client.getExpiresIn());
     }
 
     protected OAuthClientUserBean saveOrUpdateToken(OAuthClientUserBean clientUser, boolean refresh) throws Exception {
@@ -143,11 +152,11 @@ public abstract class AbstractGrantProcessor implements IOAuthGrantProcessor {
             throw new NullArgumentException("refreshToken");
         }
         //
-        return __owner.getModuleCfg().getTokenStorageAdapter().saveOrUpdateUserAccessToken(clientUser.getClientId(), clientUser.getUid(), clientUser.getScope(), clientUser.getAccessToken(), clientUser.getLastAccessToken(), clientUser.getRefreshToken(), clientUser.getExpiresIn(), refresh);
+        return __owner.getModuleCfg().getStorageAdapter().saveOrUpdateUserAccessToken(clientUser.getClientId(), clientUser.getUid(), clientUser.getScope(), clientUser.getAccessToken(), clientUser.getLastAccessToken(), clientUser.getRefreshToken(), clientUser.getExpiresIn(), refresh);
     }
 
     protected OAuthCodeBean saveOrUpdateCode(OAuthCodeBean codeBean) throws Exception {
-        return __owner.getModuleCfg().getTokenStorageAdapter().saveOrUpdateCode(codeBean.getCode(), codeBean.getClientId(), codeBean.getRedirectUri(), codeBean.getUid(), codeBean.getScope());
+        return __owner.getModuleCfg().getStorageAdapter().saveOrUpdateCode(codeBean.getCode(), codeBean.getClientId(), codeBean.getRedirectUri(), codeBean.getUid(), codeBean.getScope());
     }
 
     @Override

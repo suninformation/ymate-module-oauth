@@ -17,12 +17,12 @@ package net.ymate.module.oauth.impl;
 
 import net.ymate.module.oauth.AbstractScopeProcessor;
 import net.ymate.module.oauth.IOAuth;
+import net.ymate.module.oauth.OAuth;
 import net.ymate.module.oauth.annotation.OAuthScope;
 import net.ymate.module.oauth.base.OAuthTokenBean;
 import net.ymate.module.oauth.base.OAuthUserInfoBean;
 import net.ymate.module.oauth.support.OAuthResponseUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 
 import javax.servlet.http.HttpServletRequest;
@@ -45,15 +45,15 @@ public class UserInfoScopeProcessor extends AbstractScopeProcessor {
         OAuthResponse _response = null;
         String _openId = request.getParameter(IOAuth.Const.OPEN_ID);
         if (StringUtils.isNotBlank(_openId)) {
-            OAuthUserInfoBean _infoBean = getOwner().getModuleCfg().getTokenStorageAdapter().findUserInfo(tokenBean.getClientId(), _openId);
+            OAuthUserInfoBean _infoBean = getOwner().getModuleCfg().getStorageAdapter().findUserInfo(tokenBean.getClientId(), _openId);
             if (_infoBean != null) {
                 OAuthResponse.OAuthResponseBuilder _builder = new OAuthResponse.OAuthResponseBuilder(HttpServletResponse.SC_OK)
                         .setParam(IOAuth.Const.OPEN_ID, _openId);
-                _response = OAuthResponseUtils.appendParams(_infoBean.getAttributes(), _builder).buildJSONMessage();
+                _response = OAuthResponseUtils.appendParams(_infoBean.getAttributes(), OAuthResponseUtils.appendParams(getParams(), _builder)).buildJSONMessage();
             }
         }
         if (_response == null) {
-            _response = OAuthResponseUtils.badRequest(OAuthError.ResourceResponse.INVALID_REQUEST);
+            _response = OAuth.get().getModuleCfg().getErrorAdapter().onError(IOAuth.ErrorType.INVALID_REQUEST);
         }
         return _response;
     }

@@ -109,4 +109,26 @@ public interface IOAuth {
 
         public static final String REDIRECT_URI_MISMATCH = "redirect_uri_mismatch";
     }
+
+    /**
+     * 错误类型
+     */
+    enum ErrorType {
+        INVALID_TOKEN,
+        EXPIRED_TOKEN,
+        INVALID_REQUEST,
+        INVALID_CLIENT,
+        INVALID_GRANT,
+        INVALID_SCOPE,
+        INSUFFICIENT_SCOPE,
+        INVALID_USER,
+        INVALID_REDIRECT_URI,
+        UNAUTHORIZED_CLIENT,
+        UNSUPPORTED_GRANT_TYPE,
+        UNSUPPORTED_RESPONSE_TYPE,
+        TEMPORARILY_UNAVAILABLE,
+        REDIRECT_URI_MISMATCH,
+        ACCESS_DENIED,
+        SERVER_ERROR
+    }
 }

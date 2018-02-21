@@ -22,7 +22,6 @@ import net.ymate.module.oauth.base.OAuthTokenBean;
 import net.ymate.module.oauth.support.OAuthResponseUtils;
 import org.apache.oltu.oauth2.as.request.OAuthTokenRequest;
 import org.apache.oltu.oauth2.as.response.OAuthASResponse;
-import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 
@@ -46,9 +45,9 @@ public class ClientCredentialsGrantProcessor extends AbstractGrantProcessor {
             OAuthTokenRequest _tokenRequest = new OAuthTokenRequest(request);
             OAuthClientBean _client = getClient(_tokenRequest.getClientId());
             if (_client == null) {
-                _response = OAuthResponseUtils.badRequest(OAuthError.TokenResponse.INVALID_CLIENT);
+                _response = buildError(IOAuth.ErrorType.INVALID_CLIENT);
             } else if (!_client.checkSecret(_tokenRequest.getClientSecret())) {
-                _response = OAuthResponseUtils.unauthorizedClient();
+                _response = buildError(IOAuth.ErrorType.UNAUTHORIZED_CLIENT);
             } else {
                 _client.setLastAccessToken(_client.getAccessToken());
                 _client.setAccessToken(getOwner().getModuleCfg().getTokenGenerator().accessToken());
@@ -58,10 +57,10 @@ public class ClientCredentialsGrantProcessor extends AbstractGrantProcessor {
                 OAuthASResponse.OAuthTokenResponseBuilder _builder = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
                         .setAccessToken(_tokenBean.getAccessToken())
                         .setExpiresIn(String.valueOf(_tokenBean.getExpiresIn()));
-                _response = OAuthResponseUtils.appendParams(getParams(), _builder).buildJSONMessage();
+                _response = OAuthResponseUtils.appendParams(_client.getAttributes(), OAuthResponseUtils.appendParams(getParams(), _builder)).buildJSONMessage();
             }
         } catch (OAuthProblemException e) {
-            _response = OAuthResponseUtils.badRequestError(e);
+            _response = buildError(e);
         }
         return _response;
     }

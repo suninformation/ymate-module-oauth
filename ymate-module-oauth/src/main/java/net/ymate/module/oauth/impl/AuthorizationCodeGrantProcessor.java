@@ -24,7 +24,6 @@ import net.ymate.module.oauth.support.OAuthResponseUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.oltu.oauth2.as.request.OAuthTokenRequest;
 import org.apache.oltu.oauth2.as.response.OAuthASResponse;
-import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 
@@ -53,19 +52,19 @@ public class AuthorizationCodeGrantProcessor extends AbstractGrantProcessor {
                 _scopes.remove(IOAuth.Const.SCOPE_SNSAPI_BASE);
             }
             if (!getOwner().getScopeNames().containsAll(_scopes)) {
-                _response = OAuthResponseUtils.badRequest(OAuthError.CodeResponse.INVALID_SCOPE);
+                _response = buildError(IOAuth.ErrorType.INVALID_SCOPE);
             } else {
-                OAuthClientBean _client = getOwner().getModuleCfg().getTokenStorageAdapter().findClient(_tokenRequest.getClientId());
+                OAuthClientBean _client = getOwner().getModuleCfg().getStorageAdapter().findClient(_tokenRequest.getClientId());
                 if (_client == null) {
-                    _response = OAuthResponseUtils.badRequest(OAuthError.TokenResponse.INVALID_CLIENT);
+                    _response = buildError(IOAuth.ErrorType.INVALID_CLIENT);
                 } else if (!_client.checkSecret(_tokenRequest.getClientSecret())) {
-                    _response = OAuthResponseUtils.unauthorizedClient();
+                    _response = buildError(IOAuth.ErrorType.UNAUTHORIZED_CLIENT);
                 } else {
                     OAuthCodeBean _code = getCode(_tokenRequest.getClientId(), _tokenRequest.getCode());
                     if (_code == null) {
-                        _response = OAuthResponseUtils.badRequest(OAuthError.TokenResponse.INVALID_REQUEST);
+                        _response = buildError(IOAuth.ErrorType.INVALID_REQUEST);
                     } else if (!StringUtils.equals(_code.getRedirectUri(), _tokenRequest.getRedirectURI())) {
-                        _response = OAuthResponseUtils.badRequest(IOAuth.Const.REDIRECT_URI_MISMATCH);
+                        _response = buildError(IOAuth.ErrorType.REDIRECT_URI_MISMATCH);
                     } else {
                         OAuthClientUserBean _clientUser = new OAuthClientUserBean();
                         _clientUser.setClientId(_code.getClientId());
@@ -85,12 +84,12 @@ public class AuthorizationCodeGrantProcessor extends AbstractGrantProcessor {
                                 .setRefreshToken(_clientUser.getRefreshToken())
                                 .setScope(_clientUser.getScope())
                                 .setParam(IOAuth.Const.OPEN_ID, _clientUser.getOpenId());
-                        _response = OAuthResponseUtils.appendParams(getParams(), _builder).buildJSONMessage();
+                        _response = OAuthResponseUtils.appendParams(_clientUser.getAttributes(), OAuthResponseUtils.appendParams(getParams(), _builder)).buildJSONMessage();
                     }
                 }
             }
         } catch (OAuthProblemException e) {
-            _response = OAuthResponseUtils.badRequestError(e);
+            _response = buildError(e);
         }
         return _response;
     }

@@ -15,17 +15,16 @@
  */
 package net.ymate.module.oauth.web.intercept;
 
+import net.ymate.module.oauth.IOAuth;
 import net.ymate.module.oauth.IOAuthScopeProcessor;
 import net.ymate.module.oauth.OAuth;
 import net.ymate.module.oauth.annotation.OAuthScope;
 import net.ymate.module.oauth.base.OAuthTokenBean;
-import net.ymate.module.oauth.support.OAuthResponseUtils;
 import net.ymate.platform.core.beans.intercept.AbstractInterceptor;
 import net.ymate.platform.core.beans.intercept.InterceptContext;
 import net.ymate.platform.webmvc.context.WebContext;
 import net.ymate.platform.webmvc.view.impl.HttpStatusView;
 import org.apache.commons.lang.StringUtils;
-import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,7 +40,7 @@ public class UserAccessTokenCheckInterceptor extends AbstractInterceptor {
         OAuthResponse _response;
         OAuthScope _scope = context.getTargetMethod().getAnnotation(OAuthScope.class);
         if (_scope == null || StringUtils.isBlank(_scope.value())) {
-            _response = OAuthResponseUtils.unauthorizedClient(OAuthError.CodeResponse.INVALID_SCOPE);
+            _response = OAuth.get().getModuleCfg().getErrorAdapter().onError(IOAuth.ErrorType.INVALID_SCOPE);
         } else {
             HttpServletRequest _request = WebContext.getRequest();
             _response = OAuth.get().checkUserAccessToken(_request, _scope.value());
@@ -54,7 +53,7 @@ public class UserAccessTokenCheckInterceptor extends AbstractInterceptor {
                     }
                 }
                 if (_response == null) {
-                    _response = OAuthResponseUtils.badRequest(OAuthError.ResourceResponse.INVALID_REQUEST);
+                    _response = OAuth.get().getModuleCfg().getErrorAdapter().onError(IOAuth.ErrorType.INVALID_REQUEST);
                 }
             }
         }

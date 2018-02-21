@@ -23,7 +23,6 @@ import net.ymate.module.oauth.OAuth;
 import net.ymate.module.oauth.annotation.OAuthScope;
 import net.ymate.module.oauth.impl.ImplicitGrantProcessor;
 import net.ymate.module.oauth.support.NeedAuthorizationException;
-import net.ymate.module.oauth.support.OAuthResponseUtils;
 import net.ymate.module.oauth.web.INeedAuthorizationProcessor;
 import net.ymate.module.oauth.web.impl.DefaultNeedAuthorizationProcessor;
 import net.ymate.module.oauth.web.intercept.UserAccessTokenCheckInterceptor;
@@ -40,7 +39,6 @@ import net.ymate.platform.webmvc.view.View;
 import net.ymate.platform.webmvc.view.impl.HttpStatusView;
 import org.apache.commons.lang.StringUtils;
 import org.apache.oltu.oauth2.as.response.OAuthASResponse;
-import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
@@ -112,9 +110,9 @@ public class OAuthController {
             GrantType _grantType = GrantType.valueOf(StringUtils.upperCase(StringUtils.trimToEmpty(_request.getParameter(org.apache.oltu.oauth2.common.OAuth.OAUTH_GRANT_TYPE))));
             _response = OAuth.get().getGrantProcessor(_grantType).process(_request);
         } catch (OAuthProblemException e) {
-            _response = OAuthResponseUtils.badRequestError(e);
+            _response = OAuth.get().getModuleCfg().getErrorAdapter().onError(e);
         } catch (IllegalArgumentException e) {
-            _response = OAuthResponseUtils.badRequest(OAuthError.TokenResponse.INVALID_GRANT);
+            _response = OAuth.get().getModuleCfg().getErrorAdapter().onError(IOAuth.ErrorType.INVALID_REQUEST);
         }
         return new HttpStatusView(_response.getResponseStatus(), false).writeBody(_response.getBody());
     }

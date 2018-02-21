@@ -15,10 +15,7 @@
  */
 package net.ymate.module.oauth.impl;
 
-import net.ymate.module.oauth.IOAuth;
-import net.ymate.module.oauth.IOAuthModuleCfg;
-import net.ymate.module.oauth.IOAuthStorageAdapter;
-import net.ymate.module.oauth.IOAuthTokenGenerator;
+import net.ymate.module.oauth.*;
 import net.ymate.platform.core.YMP;
 import net.ymate.platform.core.lang.BlurObject;
 import net.ymate.platform.core.util.ClassUtils;
@@ -51,6 +48,8 @@ public class DefaultModuleCfg implements IOAuthModuleCfg {
     private IOAuthTokenGenerator __tokenGenerator;
 
     private IOAuthStorageAdapter __storageAdapter;
+
+    private IOAuthErrorAdapter __errorAdapter;
 
     public DefaultModuleCfg(YMP owner) {
         Map<String, String> _moduleCfgs = owner.getConfig().getModuleConfigs(IOAuth.MODULE_NAME);
@@ -100,6 +99,11 @@ public class DefaultModuleCfg implements IOAuthModuleCfg {
             //
             __storageAdapter = ClassUtils.impl(_moduleCfgs.get("storage_adapter_class"), IOAuthStorageAdapter.class, getClass());
         }
+        //
+        __errorAdapter = ClassUtils.impl(_moduleCfgs.get("error_adapter_class"), IOAuthErrorAdapter.class, getClass());
+        if (__errorAdapter == null) {
+            __errorAdapter = new DefaultErrorAdapter();
+        }
     }
 
     @Override
@@ -138,7 +142,12 @@ public class DefaultModuleCfg implements IOAuthModuleCfg {
     }
 
     @Override
-    public IOAuthStorageAdapter getTokenStorageAdapter() {
+    public IOAuthStorageAdapter getStorageAdapter() {
         return __storageAdapter;
+    }
+
+    @Override
+    public IOAuthErrorAdapter getErrorAdapter() {
+        return __errorAdapter;
     }
 }

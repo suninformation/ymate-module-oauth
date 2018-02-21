@@ -6,13 +6,13 @@
 > - 支持授权码模式 `grant_type=authorization_code`；
 > - 支持密码模式 `grant_type=password`；
 > - 支持简单模式 `response_type=token`；
-> - 支持`scope`权限范围：`snsapi_base`和`snsapi_userinfo`；
+> - 支持自定义`scope`权限，默认支持：`snsapi_base`和`snsapi_userinfo`；
 > - 支持令牌更新：`grant_type=refresh_token`；
 > - 支持令牌有效性验证；
 > - 支持拦截器限制接口请求的`scope`权限：
 >
 >   - 客户端授权拦截器：ClientAccessTokenCheckInterceptor.class
->   - 用户网页授权拦截器：SnsAccessTokenCheckInterceptor.class
+>   - 用户网页授权拦截器：UserAccessTokenCheckInterceptor.class
 
 #### Maven包依赖
 
@@ -51,6 +51,9 @@
     
     # OAuth令牌存储适配器接口实现, 默认值: 空
     ymp.configs.module.oauth.storage_adapter_class=
+    
+    # 错误信息响应适配器接口实现, 默认值: net.ymate.module.oauth.impl.DefaultErrorAdapter
+    ymp.configs.module.oauth.error_adapter_class=
     
     # OAuth用户授权处理器接口实现, 默认值: net.ymate.module.oauth.web.impl.DefaultNeedAuthorizationProcessor
     ymp.params.module.oauth.need_authorization_processor_class=

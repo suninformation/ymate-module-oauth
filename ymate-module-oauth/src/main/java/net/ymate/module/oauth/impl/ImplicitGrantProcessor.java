@@ -26,7 +26,6 @@ import org.apache.commons.lang.NullArgumentException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.oltu.oauth2.as.request.OAuthAuthzRequest;
 import org.apache.oltu.oauth2.as.response.OAuthASResponse;
-import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 import org.apache.oltu.oauth2.common.message.types.ResponseType;
@@ -59,7 +58,7 @@ public class ImplicitGrantProcessor extends AbstractGrantProcessor {
         try {
             OAuthAuthzRequest _oauthRequest = new OAuthAuthzRequest(request);
             if (!StringUtils.equalsIgnoreCase(__responseType.toString(), _oauthRequest.getResponseType())) {
-                _response = OAuthResponseUtils.badRequest(OAuthError.CodeResponse.UNSUPPORTED_RESPONSE_TYPE);
+                _response = buildError(IOAuth.ErrorType.UNSUPPORTED_RESPONSE_TYPE);
             } else {
                 Set<String> _scopes = _oauthRequest.getScopes();
                 if (!_scopes.contains(IOAuth.Const.SCOPE_SNSAPI_BASE)) {
@@ -70,17 +69,17 @@ public class ImplicitGrantProcessor extends AbstractGrantProcessor {
                 String _redirectURI = _oauthRequest.getRedirectURI();
                 //
                 if (StringUtils.isBlank(_uid)) {
-                    _response = OAuthResponseUtils.badRequest(IOAuth.Const.INVALID_USER);
+                    _response = buildError(IOAuth.ErrorType.INVALID_USER);
                 } else if (StringUtils.isBlank(_redirectURI)) {
-                    _response = OAuthResponseUtils.badRequest(IOAuth.Const.INVALID_REDIRECT_URI);
+                    _response = buildError(IOAuth.ErrorType.INVALID_REDIRECT_URI);
                 } else if (!getOwner().getScopeNames().containsAll(_scopes)) {
-                    _response = OAuthResponseUtils.badRequest(OAuthError.CodeResponse.INVALID_SCOPE);
+                    _response = buildError(IOAuth.ErrorType.INVALID_SCOPE);
                 } else {
                     OAuthClientBean _client = getClient(_oauthRequest.getClientId());
                     if (_client == null) {
-                        _response = OAuthResponseUtils.badRequest(OAuthError.TokenResponse.INVALID_CLIENT);
+                        _response = buildError(IOAuth.ErrorType.INVALID_CLIENT);
                     } else if (ResponseType.TOKEN.equals(__responseType) && !_client.checkSecret(_oauthRequest.getClientSecret())) {
-                        _response = OAuthResponseUtils.unauthorizedClient();
+                        _response = buildError(IOAuth.ErrorType.UNAUTHORIZED_CLIENT);
                     } else {
                         String _scope = OAuthUtils.encodeScopes(_scopes);
                         String _state = _oauthRequest.getState();
@@ -106,7 +105,7 @@ public class ImplicitGrantProcessor extends AbstractGrantProcessor {
                 }
             }
         } catch (OAuthProblemException e) {
-            _response = OAuthResponseUtils.badRequestError(e);
+            _response = buildError(e);
         }
         return _response;
     }
@@ -150,10 +149,10 @@ public class ImplicitGrantProcessor extends AbstractGrantProcessor {
                 if (StringUtils.isNotBlank(state)) {
                     _builder.setParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_STATE, state);
                 }
-                _response = OAuthResponseUtils.appendParams(getParams(), _builder).buildJSONMessage();
+                _response = OAuthResponseUtils.appendParams(_clientUser.getAttributes(), OAuthResponseUtils.appendParams(getParams(), _builder)).buildJSONMessage();
                 break;
             default:
-                _response = OAuthResponseUtils.badRequest(OAuthError.CodeResponse.UNSUPPORTED_RESPONSE_TYPE);
+                _response = buildError(IOAuth.ErrorType.UNSUPPORTED_RESPONSE_TYPE);
         }
         return _response;
     }

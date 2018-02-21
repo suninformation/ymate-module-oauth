@@ -17,7 +17,6 @@ package net.ymate.module.oauth.support;
 
 import net.ymate.platform.core.lang.BlurObject;
 import org.apache.oltu.oauth2.as.response.OAuthASResponse;
-import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
@@ -38,14 +37,7 @@ public class OAuthResponseUtils {
                 .buildJSONMessage();
     }
 
-    public static OAuthResponse unauthorizedClient() throws OAuthSystemException {
-        return OAuthASResponse
-                .errorResponse(HttpServletResponse.SC_UNAUTHORIZED)
-                .setError(OAuthError.TokenResponse.UNAUTHORIZED_CLIENT)
-                .buildJSONMessage();
-    }
-
-    public static OAuthResponse unauthorizedClient(String error) throws OAuthSystemException {
+    public static OAuthResponse unauthorized(String error) throws OAuthSystemException {
         return OAuthASResponse
                 .errorResponse(HttpServletResponse.SC_UNAUTHORIZED)
                 .setError(error)
@@ -60,8 +52,10 @@ public class OAuthResponseUtils {
     }
 
     public static OAuthResponse.OAuthResponseBuilder appendParams(Map<String, Object> params, OAuthResponse.OAuthResponseBuilder builder) {
-        for (Map.Entry<String, Object> _entry : params.entrySet()) {
-            builder.setParam(_entry.getKey(), BlurObject.bind(_entry.getValue()).toStringValue());
+        if (params != null && !params.isEmpty()) {
+            for (Map.Entry<String, Object> _entry : params.entrySet()) {
+                builder.setParam(_entry.getKey(), BlurObject.bind(_entry.getValue()).toStringValue());
+            }
         }
         return builder;
     }
