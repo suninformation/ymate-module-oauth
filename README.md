@@ -57,6 +57,9 @@
     
     # OAuth用户授权处理器接口实现, 默认值: net.ymate.module.oauth.web.impl.DefaultNeedAuthorizationProcessor
     ymp.params.module.oauth.need_authorization_processor_class=
+    
+    # OAuth异常错误处理器，可选参数
+    ymp.configs.webmvc.error_processor_class=net.ymate.module.oauth.web.WebErrorProcessor
 
 #### 示例代码
 
