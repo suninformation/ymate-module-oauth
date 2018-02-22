@@ -17,6 +17,7 @@ package net.ymate.module.oauth.impl;
 
 import net.ymate.module.oauth.AbstractGrantProcessor;
 import net.ymate.module.oauth.IOAuth;
+import net.ymate.module.oauth.OAuthEvent;
 import net.ymate.module.oauth.base.OAuthClientBean;
 import net.ymate.module.oauth.base.OAuthClientUserBean;
 import net.ymate.module.oauth.base.OAuthCodeBean;
@@ -139,6 +140,8 @@ public class ImplicitGrantProcessor extends AbstractGrantProcessor {
                     _clientUser.setExpiresIn(getOwner().getModuleCfg().getAccessTokenExpireIn());
                 }
                 _clientUser = saveOrUpdateToken(_clientUser, false);
+                //
+                getOwner().getOwner().getEvents().fireEvent(new OAuthEvent(getOwner(), OAuthEvent.EVENT.IMPLICIT).setEventSource(_clientUser));
                 //
                 OAuthResponse.OAuthResponseBuilder _builder = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
                         .setAccessToken(_clientUser.getAccessToken())

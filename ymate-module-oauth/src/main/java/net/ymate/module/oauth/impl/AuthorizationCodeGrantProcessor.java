@@ -17,6 +17,7 @@ package net.ymate.module.oauth.impl;
 
 import net.ymate.module.oauth.AbstractGrantProcessor;
 import net.ymate.module.oauth.IOAuth;
+import net.ymate.module.oauth.OAuthEvent;
 import net.ymate.module.oauth.base.OAuthClientBean;
 import net.ymate.module.oauth.base.OAuthClientUserBean;
 import net.ymate.module.oauth.base.OAuthCodeBean;
@@ -77,6 +78,8 @@ public class AuthorizationCodeGrantProcessor extends AbstractGrantProcessor {
                         _clientUser.setRefreshToken(getOwner().getModuleCfg().getTokenGenerator().refreshToken());
                         //
                         _clientUser = saveOrUpdateToken(_clientUser, false);
+                        //
+                        getOwner().getOwner().getEvents().fireEvent(new OAuthEvent(getOwner(), OAuthEvent.EVENT.AUTHORIZATION_CODE).setEventSource(_clientUser));
                         //
                         OAuthResponse.OAuthResponseBuilder _builder = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
                                 .setAccessToken(_clientUser.getAccessToken())

@@ -17,6 +17,7 @@ package net.ymate.module.oauth.impl;
 
 import net.ymate.module.oauth.AbstractGrantProcessor;
 import net.ymate.module.oauth.IOAuth;
+import net.ymate.module.oauth.OAuthEvent;
 import net.ymate.module.oauth.base.OAuthClientBean;
 import net.ymate.module.oauth.base.OAuthTokenBean;
 import net.ymate.module.oauth.support.OAuthResponseUtils;
@@ -54,6 +55,9 @@ public class ClientCredentialsGrantProcessor extends AbstractGrantProcessor {
                 _client.setExpiresIn(getOwner().getModuleCfg().getAccessTokenExpireIn());
                 //
                 OAuthTokenBean _tokenBean = saveOrUpdateToken(_client);
+                //
+                getOwner().getOwner().getEvents().fireEvent(new OAuthEvent(getOwner(), OAuthEvent.EVENT.CLIENT_CREDENTIALS).setEventSource(_client));
+                //
                 OAuthASResponse.OAuthTokenResponseBuilder _builder = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
                         .setAccessToken(_tokenBean.getAccessToken())
                         .setExpiresIn(String.valueOf(_tokenBean.getExpiresIn()));

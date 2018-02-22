@@ -85,6 +85,7 @@ public class OAuth implements IModule, IOAuth {
             _LOG.info("Initializing ymate-module-oauth-" + VERSION);
             //
             __owner = owner;
+            __owner.getEvents().registerEvent(OAuthEvent.class);
             __owner.registerHandler(OAuthScope.class, new OAuthScopeHandler(this));
             __moduleCfg = new DefaultModuleCfg(owner);
             //

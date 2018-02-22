@@ -108,7 +108,14 @@ public class OAuthController {
         try {
             HttpServletRequest _request = WebContext.getRequest();
             GrantType _grantType = GrantType.valueOf(StringUtils.upperCase(StringUtils.trimToEmpty(_request.getParameter(org.apache.oltu.oauth2.common.OAuth.OAUTH_GRANT_TYPE))));
-            _response = OAuth.get().getGrantProcessor(_grantType).process(_request);
+            switch (_grantType) {
+                case AUTHORIZATION_CODE:
+                case PASSWORD:
+                    _response = OAuth.get().getGrantProcessor(_grantType).process(_request);
+                    break;
+                default:
+                    _response = IOAuthGrantProcessor.UNSUPPORTED_GRANT_TYPE.process(WebContext.getRequest());
+            }
         } catch (OAuthProblemException e) {
             _response = OAuth.get().getModuleCfg().getErrorAdapter().onError(e);
         } catch (IllegalArgumentException e) {
