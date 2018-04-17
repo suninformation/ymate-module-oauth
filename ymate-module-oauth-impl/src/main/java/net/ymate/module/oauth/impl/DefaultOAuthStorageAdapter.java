@@ -244,6 +244,10 @@ public class DefaultOAuthStorageAdapter implements IOAuthStorageAdapter {
         return true;
     }
 
+    public String buildOpenId(String clientId, String uid) {
+        return DigestUtils.md5Hex(clientId + uid);
+    }
+
     @Override
     public OAuthClientUserBean findUser(String clientId, String uid) throws Exception {
         if (StringUtils.isBlank(clientId)) {
@@ -252,7 +256,7 @@ public class DefaultOAuthStorageAdapter implements IOAuthStorageAdapter {
         if (StringUtils.isBlank(uid)) {
             throw new NullArgumentException("uid");
         }
-        String _targetId = DigestUtils.md5Hex(clientId + uid);
+        String _targetId = buildOpenId(clientId, uid);
         OAuthClientUserBean _clientUserBean = __getCacheElement(CacheDataType.CLIENT_USER, _targetId);
         if (_clientUserBean == null) {
             OAuthUser _user = OAuthUser.builder().id(_targetId).build().load();
@@ -313,7 +317,7 @@ public class DefaultOAuthStorageAdapter implements IOAuthStorageAdapter {
     public OAuthClientUserBean saveOrUpdateUserAccessToken(final String clientId, final String uid, final String scope, final String accessToken, final String lastAccessToken, final String refreshToken, final int expiresIn, final boolean refresh) throws Exception {
         return Transactions.execute(new Trade<OAuthClientUserBean>() {
             public void deal() throws Throwable {
-                String _targetId = DigestUtils.md5Hex(clientId + uid);
+                String _targetId = buildOpenId(clientId, uid);
                 OAuthUser _user = OAuthUser.builder().id(_targetId).build().load(IDBLocker.DEFAULT);
                 long _now = System.currentTimeMillis();
                 if (_user == null) {

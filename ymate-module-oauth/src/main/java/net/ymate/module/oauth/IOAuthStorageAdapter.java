@@ -68,6 +68,15 @@ public interface IOAuthStorageAdapter extends IInitializable<IOAuth> {
 
     // -----
 
+    /**
+     * @param clientId 应用唯一标识
+     * @param uid      用户主键
+     * @return 生成基于clientId唯一的OpenId值
+     */
+    String buildOpenId(String clientId, String uid);
+
+    // -----
+
     OAuthClientUserBean findUser(String clientId, String uid) throws Exception;
 
     OAuthClientUserBean findUserByAccessToken(String accessToken) throws Exception;
