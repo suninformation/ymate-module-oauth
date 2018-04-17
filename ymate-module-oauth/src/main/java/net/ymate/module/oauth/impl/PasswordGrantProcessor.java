@@ -21,6 +21,7 @@ import net.ymate.module.oauth.OAuthEvent;
 import net.ymate.module.oauth.base.OAuthClientBean;
 import net.ymate.module.oauth.base.OAuthClientUserBean;
 import net.ymate.module.oauth.support.OAuthResponseUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.oltu.oauth2.as.request.OAuthTokenRequest;
 import org.apache.oltu.oauth2.as.response.OAuthASResponse;
 import org.apache.oltu.oauth2.common.OAuth;
@@ -61,7 +62,7 @@ public class PasswordGrantProcessor extends AbstractGrantProcessor {
                     _response = buildError(IOAuth.ErrorType.UNAUTHORIZED_CLIENT);
                 } else {
                     OAuthClientUserBean _clientUser = getClientUser(_tokenRequest.getClientId(), _tokenRequest.getUsername(), _tokenRequest.getPassword());
-                    if (_clientUser == null) {
+                    if (_clientUser == null || StringUtils.isBlank(_clientUser.getOpenId()) || StringUtils.isBlank(_clientUser.getUid())) {
                         _response = buildError(IOAuth.ErrorType.INVALID_USER);
                     } else {
                         _clientUser.setClientId(_tokenRequest.getClientId());

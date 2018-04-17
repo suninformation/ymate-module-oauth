@@ -76,10 +76,21 @@ public class OAuthController {
     @ContextParam(@ParamItem(Optional.OBSERVE_SILENCE))
     public IView authorize() throws Exception {
         IView _view;
+        OAuthResponse _response;
         try {
-            OAuthResponse _response;
-            if (OAuth.get().getModuleCfg().getAllowGrantTypes().contains(GrantType.AUTHORIZATION_CODE)) {
-                _response = new ImplicitGrantProcessor(OAuth.get(), ResponseType.CODE).process(WebContext.getRequest());
+            HttpServletRequest _request = WebContext.getRequest();
+            ResponseType _responseType = ResponseType.valueOf(StringUtils.upperCase(StringUtils.trimToEmpty(_request.getParameter(org.apache.oltu.oauth2.common.OAuth.OAUTH_RESPONSE_TYPE))));
+            GrantType _grantType;
+            switch (_responseType) {
+                case CODE:
+                    _grantType = GrantType.AUTHORIZATION_CODE;
+                    break;
+                default:
+                    _grantType = GrantType.IMPLICIT;
+                    break;
+            }
+            if (OAuth.get().getModuleCfg().getAllowGrantTypes().contains(_grantType)) {
+                _response = new ImplicitGrantProcessor(OAuth.get(), _responseType).process(WebContext.getRequest());
             } else {
                 _response = IOAuthGrantProcessor.UNSUPPORTED_GRANT_TYPE.process(WebContext.getRequest());
             }
@@ -94,6 +105,9 @@ public class OAuthController {
                 _processorClass = new DefaultNeedAuthorizationProcessor();
             }
             _view = _processorClass.process(e);
+        } catch (IllegalArgumentException e) {
+            _response = OAuth.get().getModuleCfg().getErrorAdapter().onError(IOAuth.ErrorType.INVALID_REQUEST);
+            _view = new HttpStatusView(_response.getResponseStatus(), false).writeBody(_response.getBody());
         }
         return _view;
     }
