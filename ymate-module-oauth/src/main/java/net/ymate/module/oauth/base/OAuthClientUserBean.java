@@ -46,6 +46,12 @@ public class OAuthClientUserBean extends OAuthTokenBean {
         super();
     }
 
+    public OAuthClientUserBean(String openId, String uid) {
+        super();
+        this.openId = openId;
+        this.uid = uid;
+    }
+
     public OAuthClientUserBean(String clientId,
                                String uid,
                                boolean authorized,
