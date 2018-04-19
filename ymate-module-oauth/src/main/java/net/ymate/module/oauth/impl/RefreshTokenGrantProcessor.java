@@ -46,36 +46,38 @@ public class RefreshTokenGrantProcessor extends AbstractGrantProcessor {
             OAuthTokenRequest _tokenRequest = new OAuthTokenRequest(request);
             //
             OAuthClientBean _client = getClient(_tokenRequest.getClientId());
-            OAuthClientUserBean _clientUser = getClientUser(_tokenRequest.getClientId(), _tokenRequest.getRefreshToken(), IdType.REFRESH_TOKEN);
             if (_client == null) {
                 _response = buildError(IOAuth.ErrorType.INVALID_CLIENT);
-            } else if (_clientUser == null) {
-                _response = buildError(IOAuth.ErrorType.INVALID_TOKEN);
             } else {
-                int _refreshCountMax = getOwner().getModuleCfg().getRefreshCountMax();
-                int _refreshTokenExpireIn = getOwner().getModuleCfg().getRefreshTokenExpireIn();
-                //
-                if (!_clientUser.checkRefreshToken(_refreshCountMax, _refreshTokenExpireIn)) {
-                    _response = buildError(IOAuth.ErrorType.EXPIRED_TOKEN);
-                } else if (!_clientUser.checkScope(_tokenRequest.getParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_SCOPE))) {
-                    _response = buildError(IOAuth.ErrorType.INSUFFICIENT_SCOPE);
+                OAuthClientUserBean _clientUser = getClientUser(_tokenRequest.getClientId(), _tokenRequest.getRefreshToken(), IdType.REFRESH_TOKEN);
+                if (_clientUser == null) {
+                    _response = buildError(IOAuth.ErrorType.INVALID_TOKEN);
                 } else {
-                    _clientUser.setLastAccessToken(_clientUser.getAccessToken());
-                    _clientUser.setAccessToken(getOwner().getModuleCfg().getTokenGenerator().accessToken());
-                    _clientUser.setExpiresIn(getOwner().getModuleCfg().getAccessTokenExpireIn());
-                    _clientUser.setRefreshToken(getOwner().getModuleCfg().getTokenGenerator().refreshToken());
+                    int _refreshCountMax = getOwner().getModuleCfg().getRefreshCountMax();
+                    int _refreshTokenExpireIn = getOwner().getModuleCfg().getRefreshTokenExpireIn();
                     //
-                    _clientUser = saveOrUpdateToken(_clientUser, true);
-                    //
-                    getOwner().getOwner().getEvents().fireEvent(new OAuthEvent(getOwner(), OAuthEvent.EVENT.REFRESH_TOKEN).setEventSource(_clientUser));
-                    //
-                    OAuthResponse.OAuthResponseBuilder _builder = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
-                            .setAccessToken(_clientUser.getAccessToken())
-                            .setExpiresIn(String.valueOf(_clientUser.getExpiresIn()))
-                            .setRefreshToken(_clientUser.getRefreshToken())
-                            .setScope(_clientUser.getScope())
-                            .setParam(IOAuth.Const.OPEN_ID, _clientUser.getOpenId());
-                    _response = OAuthResponseUtils.appendParams(_clientUser.getAttributes(), OAuthResponseUtils.appendParams(getParams(), _builder)).buildJSONMessage();
+                    if (!_clientUser.checkRefreshToken(_refreshCountMax, _refreshTokenExpireIn)) {
+                        _response = buildError(IOAuth.ErrorType.EXPIRED_TOKEN);
+                    } else if (!_clientUser.checkScope(_tokenRequest.getParam(org.apache.oltu.oauth2.common.OAuth.OAUTH_SCOPE))) {
+                        _response = buildError(IOAuth.ErrorType.INSUFFICIENT_SCOPE);
+                    } else {
+                        _clientUser.setLastAccessToken(_clientUser.getAccessToken());
+                        _clientUser.setAccessToken(getOwner().getModuleCfg().getTokenGenerator().accessToken());
+                        _clientUser.setExpiresIn(getOwner().getModuleCfg().getAccessTokenExpireIn());
+                        _clientUser.setRefreshToken(getOwner().getModuleCfg().getTokenGenerator().refreshToken());
+                        //
+                        _clientUser = saveOrUpdateToken(_clientUser, true);
+                        //
+                        getOwner().getOwner().getEvents().fireEvent(new OAuthEvent(getOwner(), OAuthEvent.EVENT.REFRESH_TOKEN).setEventSource(_clientUser));
+                        //
+                        OAuthResponse.OAuthResponseBuilder _builder = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
+                                .setAccessToken(_clientUser.getAccessToken())
+                                .setExpiresIn(String.valueOf(_clientUser.getExpiresIn()))
+                                .setRefreshToken(_clientUser.getRefreshToken())
+                                .setScope(_clientUser.getScope())
+                                .setParam(IOAuth.Const.OPEN_ID, _clientUser.getOpenId());
+                        _response = OAuthResponseUtils.appendParams(_clientUser.getAttributes(), OAuthResponseUtils.appendParams(getParams(), _builder)).buildJSONMessage();
+                    }
                 }
             }
         } catch (OAuthProblemException e) {
