@@ -165,7 +165,7 @@ public class DefaultOAuthStorageAdapter implements IOAuthStorageAdapter {
         }
         OAuthClientBean _clientBean = __getCacheElement(CacheDataType.CLIENT, clientId);
         if (_clientBean == null) {
-            OAuthClient _client = OAuthClient.builder().id(clientId).build().load();
+            OAuthClient _client = OAuthClient.builder().id(clientId).status(0).build().load();
             if (_client != null) {
                 _clientBean = toOAuthClientBean(_client);
                 __putCacheElement(CacheDataType.CLIENT, _clientBean);
@@ -185,7 +185,7 @@ public class DefaultOAuthStorageAdapter implements IOAuthStorageAdapter {
             _clientBean = __getCacheElement(CacheDataType.CLIENT, _clientId);
         }
         if (_clientBean == null) {
-            OAuthClient _client = OAuthClient.builder().accessToken(accessToken).build().findFirst();
+            OAuthClient _client = OAuthClient.builder().accessToken(accessToken).status(0).build().findFirst();
             if (_client != null) {
                 _clientBean = toOAuthClientBean(_client);
                 __putCacheElement(CacheDataType.CLIENT, _clientBean);
@@ -216,6 +216,32 @@ public class DefaultOAuthStorageAdapter implements IOAuthStorageAdapter {
                 setReturns(toOAuthClientBean(_client));
             }
         });
+    }
+
+    @Override
+    public boolean removeClientAccessToken(String clientId, String accessToken) throws Exception {
+        if (StringUtils.isNotBlank(accessToken)) {
+            if (StringUtils.isBlank(clientId)) {
+                clientId = __getCacheElement(CacheDataType.CLIENT, accessToken);
+            }
+            //
+            OAuthClientBean _clientBean = null;
+            if (StringUtils.isNotBlank(clientId)) {
+                _clientBean = __getCacheElement(CacheDataType.CLIENT, clientId);
+            }
+            __cleanCacheElement(CacheDataType.CLIENT, clientId, accessToken, _clientBean == null ? null : _clientBean.getLastAccessToken());
+            //
+            if (_clientBean != null) {
+                OAuthClient.builder().id(_clientBean.getClientId()).lastModifyTime(System.currentTimeMillis()).build()
+                        .update(Fields.create(OAuthClient.FIELDS.ACCESS_TOKEN,
+                                OAuthClient.FIELDS.LAST_ACCESS_TOKEN,
+                                OAuthClient.FIELDS.EXPIRES_IN,
+                                OAuthClient.FIELDS.LAST_MODIFY_TIME));
+            }
+            //
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -361,6 +387,36 @@ public class DefaultOAuthStorageAdapter implements IOAuthStorageAdapter {
                 this.setReturns(toOAuthClientUserBean(_user));
             }
         });
+    }
+
+    @Override
+    public boolean removeUserAccessToken(String clientId, String uid, String accessToken) throws Exception {
+        if (StringUtils.isNotBlank(accessToken)) {
+            String _targetId;
+            if (StringUtils.isBlank(clientId) || StringUtils.isBlank(uid)) {
+                _targetId = __getCacheElement(CacheDataType.CLIENT_USER, accessToken);
+            } else {
+                _targetId = buildOpenId(clientId, uid);
+            }
+            OAuthClientUserBean _clientUserBean = null;
+            if (StringUtils.isNotBlank(_targetId)) {
+                _clientUserBean = __getCacheElement(CacheDataType.CLIENT_USER, _targetId);
+            }
+            __cleanCacheElement(CacheDataType.CLIENT_USER, clientId, accessToken, _clientUserBean == null ? null : _clientUserBean.getLastAccessToken());
+            //
+            if (_clientUserBean != null) {
+                OAuthUser.builder().id(_targetId).lastModifyTime(System.currentTimeMillis()).build()
+                        .update(Fields.create(OAuthUser.FIELDS.ACCESS_TOKEN,
+                                OAuthUser.FIELDS.LAST_ACCESS_TOKEN,
+                                OAuthUser.FIELDS.REFRESH_TOKEN,
+                                OAuthUser.FIELDS.REFRESH_COUNT,
+                                OAuthUser.FIELDS.SCOPE,
+                                OAuthUser.FIELDS.LAST_MODIFY_TIME));
+            }
+            //
+            return true;
+        }
+        return false;
     }
 
     enum CacheDataType {
