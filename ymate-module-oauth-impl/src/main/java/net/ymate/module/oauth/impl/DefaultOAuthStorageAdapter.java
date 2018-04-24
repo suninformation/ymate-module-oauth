@@ -270,6 +270,7 @@ public class DefaultOAuthStorageAdapter implements IOAuthStorageAdapter {
         return true;
     }
 
+    @Override
     public String buildOpenId(String clientId, String uid) {
         return DigestUtils.md5Hex(clientId + uid);
     }
@@ -342,6 +343,7 @@ public class DefaultOAuthStorageAdapter implements IOAuthStorageAdapter {
     @Override
     public OAuthClientUserBean saveOrUpdateUserAccessToken(final String clientId, final String uid, final String scope, final String accessToken, final String lastAccessToken, final String refreshToken, final int expiresIn, final boolean refresh) throws Exception {
         return Transactions.execute(new Trade<OAuthClientUserBean>() {
+            @Override
             public void deal() throws Throwable {
                 String _targetId = buildOpenId(clientId, uid);
                 OAuthUser _user = OAuthUser.builder().id(_targetId).build().load(IDBLocker.DEFAULT);
