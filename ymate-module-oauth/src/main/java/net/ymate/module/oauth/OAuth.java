@@ -194,7 +194,7 @@ public class OAuth implements IModule, IOAuth {
             } else if (StringUtils.isNotBlank(scope) && !_tokenBean.containsScope(Collections.singleton(scope))) {
                 _response = __moduleCfg.getErrorAdapter().onError(ErrorType.INSUFFICIENT_SCOPE);
             } else {
-                request.setAttribute(OAuthTokenBean.class.getName(), _tokenBean);
+                request.setAttribute(OAuthClientUserBean.class.getName(), _tokenBean);
                 request.setAttribute(Const.ACCESS_TOKEN, _oauthRequest.getAccessToken());
             }
         } catch (OAuthProblemException e) {
