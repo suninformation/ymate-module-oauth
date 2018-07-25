@@ -49,9 +49,7 @@ public class AuthorizationCodeGrantProcessor extends AbstractGrantProcessor {
             OAuthTokenRequest _tokenRequest = new OAuthTokenRequest(request);
             //
             Set<String> _scopes = _tokenRequest.getScopes();
-            if (_scopes.contains(IOAuth.Const.SCOPE_SNSAPI_BASE)) {
-                _scopes.remove(IOAuth.Const.SCOPE_SNSAPI_BASE);
-            }
+            _scopes.remove(IOAuth.Const.SCOPE_SNSAPI_BASE);
             if (!getOwner().getScopeNames().containsAll(_scopes)) {
                 _response = buildError(IOAuth.ErrorType.INVALID_SCOPE);
             } else {

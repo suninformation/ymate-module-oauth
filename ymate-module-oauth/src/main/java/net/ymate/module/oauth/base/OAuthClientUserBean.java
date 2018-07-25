@@ -138,7 +138,7 @@ public class OAuthClientUserBean extends OAuthTokenBean {
             if (StringUtils.equalsIgnoreCase(IOAuth.Const.SCOPE_SNSAPI_BASE, _scope)) {
                 continue;
             }
-            if (StringUtils.containsIgnoreCase(this.scope, _scope)) {
+            if (!StringUtils.containsIgnoreCase(this.scope, _scope)) {
                 _flag = false;
                 break;
             }

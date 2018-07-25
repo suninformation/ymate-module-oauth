@@ -62,9 +62,7 @@ public class ImplicitGrantProcessor extends AbstractGrantProcessor {
                 _response = buildError(IOAuth.ErrorType.UNSUPPORTED_RESPONSE_TYPE);
             } else {
                 Set<String> _scopes = _oauthRequest.getScopes();
-                if (!_scopes.contains(IOAuth.Const.SCOPE_SNSAPI_BASE)) {
-                    _scopes.add(IOAuth.Const.SCOPE_SNSAPI_BASE);
-                }
+                _scopes.add(IOAuth.Const.SCOPE_SNSAPI_BASE);
                 //
                 String _uid = getParam(IOAuth.Const.UID).toStringValue();
                 String _redirectURI = _oauthRequest.getRedirectURI();
