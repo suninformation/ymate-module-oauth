@@ -20,6 +20,7 @@ import net.ymate.module.oauth.IOAuthScopeProcessor;
 import net.ymate.module.oauth.OAuth;
 import net.ymate.module.oauth.OAuthEvent;
 import net.ymate.module.oauth.annotation.OAuthScope;
+import net.ymate.module.oauth.base.OAuthClientUserBean;
 import net.ymate.module.oauth.base.OAuthTokenBean;
 import net.ymate.platform.core.beans.intercept.AbstractInterceptor;
 import net.ymate.platform.core.beans.intercept.InterceptContext;
@@ -46,7 +47,7 @@ public class UserAccessTokenCheckInterceptor extends AbstractInterceptor {
             HttpServletRequest _request = WebContext.getRequest();
             _response = OAuth.get().checkUserAccessToken(_request, _scope.value());
             if (_response == null && _scope.automatic()) {
-                OAuthTokenBean _tokenBean = (OAuthTokenBean) _request.getAttribute(OAuthTokenBean.class.getName());
+                OAuthClientUserBean _tokenBean = (OAuthClientUserBean) _request.getAttribute(OAuthClientUserBean.class.getName());
                 if (_tokenBean != null) {
                     IOAuthScopeProcessor _processor = OAuth.get().getScopeProcessor(_scope.value());
                     if (_processor != null) {
