@@ -21,7 +21,6 @@ import net.ymate.module.oauth.OAuth;
 import net.ymate.module.oauth.OAuthEvent;
 import net.ymate.module.oauth.annotation.OAuthScope;
 import net.ymate.module.oauth.base.OAuthClientUserBean;
-import net.ymate.module.oauth.base.OAuthTokenBean;
 import net.ymate.platform.core.beans.intercept.AbstractInterceptor;
 import net.ymate.platform.core.beans.intercept.InterceptContext;
 import net.ymate.platform.webmvc.context.WebContext;
@@ -40,24 +39,26 @@ public class UserAccessTokenCheckInterceptor extends AbstractInterceptor {
     @Override
     protected Object __before(InterceptContext context) throws Exception {
         OAuthResponse _response;
+        HttpServletRequest _request = WebContext.getRequest();
         OAuthScope _scope = context.getTargetMethod().getAnnotation(OAuthScope.class);
-        if (_scope == null || StringUtils.isBlank(_scope.value())) {
-            _response = OAuth.get().getModuleCfg().getErrorAdapter().onError(IOAuth.ErrorType.INVALID_SCOPE);
-        } else {
-            HttpServletRequest _request = WebContext.getRequest();
-            _response = OAuth.get().checkUserAccessToken(_request, _scope.value());
-            if (_response == null && _scope.automatic()) {
-                OAuthClientUserBean _tokenBean = (OAuthClientUserBean) _request.getAttribute(OAuthClientUserBean.class.getName());
-                if (_tokenBean != null) {
-                    IOAuthScopeProcessor _processor = OAuth.get().getScopeProcessor(_scope.value());
-                    if (_processor != null) {
-                        _response = _processor.process(_request, _tokenBean);
-                        //
-                        context.getOwner().getEvents().fireEvent(new OAuthEvent(OAuth.get(), OAuthEvent.EVENT.SCOPE_PROCESSOR).setEventSource(_scope.value()).addParamExtend(OAuthTokenBean.class.getName(), _tokenBean));
+        _response = OAuth.get().checkUserAccessToken(_request, _scope != null ? _scope.value() : null);
+        if (_response == null) {
+            if (_scope != null) {
+                if (StringUtils.isBlank(_scope.value())) {
+                    _response = OAuth.get().getModuleCfg().getErrorAdapter().onError(IOAuth.ErrorType.INVALID_SCOPE);
+                } else if (_scope.automatic()) {
+                    OAuthClientUserBean _tokenBean = (OAuthClientUserBean) _request.getAttribute(OAuthClientUserBean.class.getName());
+                    if (_tokenBean != null) {
+                        IOAuthScopeProcessor _processor = OAuth.get().getScopeProcessor(_scope.value());
+                        if (_processor != null) {
+                            _response = _processor.process(_request, _tokenBean);
+                            //
+                            context.getOwner().getEvents().fireEvent(new OAuthEvent(OAuth.get(), OAuthEvent.EVENT.SCOPE_PROCESSOR).setEventSource(_scope.value()).addParamExtend(OAuthClientUserBean.class.getName(), _tokenBean));
+                        }
                     }
-                }
-                if (_response == null) {
-                    _response = OAuth.get().getModuleCfg().getErrorAdapter().onError(IOAuth.ErrorType.INVALID_REQUEST);
+                    if (_response == null) {
+                        _response = OAuth.get().getModuleCfg().getErrorAdapter().onError(IOAuth.ErrorType.INVALID_REQUEST);
+                    }
                 }
             }
         }
@@ -68,7 +69,7 @@ public class UserAccessTokenCheckInterceptor extends AbstractInterceptor {
     }
 
     @Override
-    protected Object __after(InterceptContext context) throws Exception {
+    protected Object __after(InterceptContext context) {
         return null;
     }
 }
