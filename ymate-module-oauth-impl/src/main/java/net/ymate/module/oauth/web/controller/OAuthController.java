@@ -154,7 +154,6 @@ public class OAuthController {
      */
     @RequestMapping("/sns/auth")
     @Before(UserAccessTokenCheckInterceptor.class)
-    @OAuthScope(IOAuth.Const.SCOPE_SNSAPI_BASE)
     public IView auth() throws Exception {
         OAuthResponse _response = OAuthASResponse.errorResponse(HttpServletResponse.SC_OK).setError("ok").buildJSONMessage();
         return new HttpStatusView(_response.getResponseStatus(), false).writeBody(_response.getBody());
