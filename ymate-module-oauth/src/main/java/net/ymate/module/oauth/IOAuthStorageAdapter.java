@@ -79,11 +79,22 @@ public interface IOAuthStorageAdapter extends IInitializable<IOAuth> {
 
     // -----
 
+    OAuthClientUserBean findUser(String openId) throws Exception;
+
     OAuthClientUserBean findUser(String clientId, String uid) throws Exception;
 
     OAuthClientUserBean findUserByAccessToken(String accessToken) throws Exception;
 
     OAuthClientUserBean findUserByRefreshToken(String clientId, String refreshToken) throws Exception;
+
+    /**
+     * 填充授权用户自定义属性
+     * <p>注意: 需考虑数据被频繁加载的情况, 可以通过添加自定义标识判断是否需要执行加载动作</p>
+     *
+     * @param clientUser 预填充用户授权对象
+     * @throws Exception 可能产生的任何异常
+     */
+    void fillClientUserAttributes(OAuthClientUserBean clientUser) throws Exception;
 
     /**
      * @param clientId 应用唯一标识

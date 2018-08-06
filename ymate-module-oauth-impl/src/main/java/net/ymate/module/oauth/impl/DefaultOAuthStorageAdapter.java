@@ -83,7 +83,7 @@ public class DefaultOAuthStorageAdapter implements IOAuthStorageAdapter {
         return _clientBean;
     }
 
-    protected OAuthClientUserBean toOAuthClientUserBean(OAuthUser user) {
+    protected OAuthClientUserBean toOAuthClientUserBean(OAuthUser user) throws Exception {
         if (user == null) {
             return null;
         }
@@ -102,6 +102,8 @@ public class DefaultOAuthStorageAdapter implements IOAuthStorageAdapter {
         _clientUserBean.setAuthorized(BlurObject.bind(user.getIsAuthorized()).toBooleanValue());
         _clientUserBean.setCreateTime(user.getCreateTime());
         _clientUserBean.setLastModifyTime(user.getLastModifyTime());
+        // 填充扩展属性
+        fillClientUserAttributes(_clientUserBean);
         //
         return _clientUserBean;
     }
@@ -276,17 +278,13 @@ public class DefaultOAuthStorageAdapter implements IOAuthStorageAdapter {
     }
 
     @Override
-    public OAuthClientUserBean findUser(String clientId, String uid) throws Exception {
-        if (StringUtils.isBlank(clientId)) {
-            throw new NullArgumentException("clientId");
+    public OAuthClientUserBean findUser(String openId) throws Exception {
+        if (StringUtils.isBlank(openId)) {
+            throw new NullArgumentException("openId");
         }
-        if (StringUtils.isBlank(uid)) {
-            throw new NullArgumentException("uid");
-        }
-        String _targetId = buildOpenId(clientId, uid);
-        OAuthClientUserBean _clientUserBean = __getCacheElement(CacheDataType.CLIENT_USER, _targetId);
+        OAuthClientUserBean _clientUserBean = __getCacheElement(CacheDataType.CLIENT_USER, openId);
         if (_clientUserBean == null) {
-            OAuthUser _user = OAuthUser.builder().id(_targetId).build().load();
+            OAuthUser _user = OAuthUser.builder().id(openId).build().load();
             if (_user != null) {
                 _clientUserBean = toOAuthClientUserBean(_user);
                 __putCacheElement(CacheDataType.CLIENT_USER, _clientUserBean);
@@ -296,23 +294,34 @@ public class DefaultOAuthStorageAdapter implements IOAuthStorageAdapter {
     }
 
     @Override
+    public OAuthClientUserBean findUser(String clientId, String uid) throws Exception {
+        if (StringUtils.isBlank(clientId)) {
+            throw new NullArgumentException("clientId");
+        }
+        if (StringUtils.isBlank(uid)) {
+            throw new NullArgumentException("uid");
+        }
+        return findUser(buildOpenId(clientId, uid));
+    }
+
+    @Override
     public OAuthClientUserBean findUserByAccessToken(String accessToken) throws Exception {
         if (StringUtils.isBlank(accessToken)) {
             throw new NullArgumentException("accessToken");
         }
         String _targetId = __getCacheElement(CacheDataType.CLIENT_USER, accessToken);
-        OAuthClientUserBean _userBean = null;
+        OAuthClientUserBean _clientUserBean = null;
         if (StringUtils.isNotBlank(_targetId)) {
-            _userBean = __getCacheElement(CacheDataType.CLIENT_USER, _targetId);
+            _clientUserBean = __getCacheElement(CacheDataType.CLIENT_USER, _targetId);
         }
-        if (_userBean == null) {
+        if (_clientUserBean == null) {
             OAuthUser _user = OAuthUser.builder().accessToken(accessToken).build().findFirst();
             if (_user != null) {
-                _userBean = toOAuthClientUserBean(_user);
-                __putCacheElement(CacheDataType.CLIENT_USER, _userBean);
+                _clientUserBean = toOAuthClientUserBean(_user);
+                __putCacheElement(CacheDataType.CLIENT_USER, _clientUserBean);
             }
         }
-        return _userBean;
+        return _clientUserBean;
     }
 
     @Override
@@ -328,6 +337,10 @@ public class DefaultOAuthStorageAdapter implements IOAuthStorageAdapter {
             return toOAuthClientUserBean(_user);
         }
         return null;
+    }
+
+    @Override
+    public void fillClientUserAttributes(OAuthClientUserBean clientUser) throws Exception {
     }
 
     @Override
