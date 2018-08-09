@@ -77,8 +77,8 @@ public class ImplicitGrantProcessor extends AbstractGrantProcessor {
                     OAuthClientBean _client = getClient(_oauthRequest.getClientId());
                     if (_client == null) {
                         _response = buildError(IOAuth.ErrorType.INVALID_CLIENT);
-                    } else if (ResponseType.TOKEN.equals(__responseType) && !_client.checkSecret(_oauthRequest.getClientSecret())) {
-                        _response = buildError(IOAuth.ErrorType.UNAUTHORIZED_CLIENT);
+                    } else if (!_client.checkDomain(_redirectURI)) {
+                        _response = buildError(IOAuth.ErrorType.REDIRECT_URI_MISMATCH);
                     } else {
                         String _scope = OAuthUtils.encodeScopes(_scopes);
                         String _state = _oauthRequest.getState();

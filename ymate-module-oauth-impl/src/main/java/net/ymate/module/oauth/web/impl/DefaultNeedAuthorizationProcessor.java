@@ -32,7 +32,6 @@ public class DefaultNeedAuthorizationProcessor implements INeedAuthorizationProc
                 .addAttribute("client_title", e.getClientBean().getName())
                 .addAttribute("client_icon", e.getClientBean().getIconUrl())
                 .addAttribute("client_domain", e.getClientBean().getDomain())
-                .addAttribute("uid", e.getUid())
                 .addAttribute("scopes", e.getScopes());
     }
 }

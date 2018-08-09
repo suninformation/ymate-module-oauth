@@ -17,6 +17,7 @@ package net.ymate.module.oauth.web.controller;
 
 import net.ymate.framework.core.Optional;
 import net.ymate.framework.webmvc.intercept.UserSessionCheckInterceptor;
+import net.ymate.framework.webmvc.support.UserSessionBean;
 import net.ymate.module.oauth.IOAuth;
 import net.ymate.module.oauth.IOAuthGrantProcessor;
 import net.ymate.module.oauth.OAuth;
@@ -32,6 +33,7 @@ import net.ymate.platform.core.beans.annotation.ParamItem;
 import net.ymate.platform.core.util.ClassUtils;
 import net.ymate.platform.webmvc.annotation.Controller;
 import net.ymate.platform.webmvc.annotation.RequestMapping;
+import net.ymate.platform.webmvc.annotation.RequestParam;
 import net.ymate.platform.webmvc.base.Type;
 import net.ymate.platform.webmvc.context.WebContext;
 import net.ymate.platform.webmvc.view.IView;
@@ -68,13 +70,14 @@ public class OAuthController {
     /**
      * 获取授权码或使用简单模式直接获取访问凭证 (response_type=[code|token], scope=[snsapi_base|snsapi_userinfo])
      *
+     * @param authorized 是否授权
      * @return 重定向至redirect_url指定的URL地址
      * @throws Exception 可能产生的任何异常
      */
     @RequestMapping(value = "/sns/authorize", method = {Type.HttpMethod.POST, Type.HttpMethod.GET})
     @Before(UserSessionCheckInterceptor.class)
     @ContextParam(@ParamItem(Optional.OBSERVE_SILENCE))
-    public IView authorize() throws Exception {
+    public IView authorize(@RequestParam(defaultValue = "false") Boolean authorized) throws Exception {
         IView _view;
         OAuthResponse _response;
         try {
@@ -90,7 +93,11 @@ public class OAuthController {
                     break;
             }
             if (OAuth.get().getModuleCfg().getAllowGrantTypes().contains(_grantType)) {
-                _response = new ImplicitGrantProcessor(OAuth.get(), _responseType).process(WebContext.getRequest());
+                IOAuthGrantProcessor _processor = new ImplicitGrantProcessor(OAuth.get(), _responseType)
+                        .setParam(IOAuth.Const.UID, UserSessionBean.current().getUid())
+                        .setParam(IOAuth.Const.AUTHORIZED, authorized);
+                //
+                _response = _processor.process(WebContext.getRequest());
             } else {
                 _response = IOAuthGrantProcessor.UNSUPPORTED_GRANT_TYPE.process(WebContext.getRequest());
             }

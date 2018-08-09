@@ -21,6 +21,9 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 /**
  * @author 刘镇 (suninformation@163.com) on 17/3/13 下午9:12
  * @version 1.0
@@ -76,6 +79,19 @@ public class OAuthClientBean extends OAuthTokenBean {
 
     public boolean checkSecret(String secretKey) {
         return StringUtils.equals(this.secretKey, secretKey);
+    }
+
+    public boolean checkDomain(String redirectURI) {
+        if (StringUtils.isBlank(domain)) {
+            return true;
+        }
+        boolean _resultValue;
+        try {
+            _resultValue = StringUtils.equalsIgnoreCase(new URL(domain).getHost(), new URL(redirectURI).getHost());
+        } catch (MalformedURLException e) {
+            _resultValue = StringUtils.startsWithIgnoreCase(redirectURI, domain);
+        }
+        return _resultValue;
     }
 
     @Override

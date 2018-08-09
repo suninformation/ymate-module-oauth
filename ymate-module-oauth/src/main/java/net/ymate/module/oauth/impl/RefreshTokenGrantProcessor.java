@@ -48,6 +48,8 @@ public class RefreshTokenGrantProcessor extends AbstractGrantProcessor {
             OAuthClientBean _client = getClient(_tokenRequest.getClientId());
             if (_client == null) {
                 _response = buildError(IOAuth.ErrorType.INVALID_CLIENT);
+            } else if (!_client.checkSecret(_tokenRequest.getClientSecret())) {
+                _response = buildError(IOAuth.ErrorType.UNAUTHORIZED_CLIENT);
             } else {
                 OAuthClientUserBean _clientUser = getClientUser(_tokenRequest.getClientId(), _tokenRequest.getRefreshToken(), IdType.REFRESH_TOKEN);
                 if (_clientUser == null) {
