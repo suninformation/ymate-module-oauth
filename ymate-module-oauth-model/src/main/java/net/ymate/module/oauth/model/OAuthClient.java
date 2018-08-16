@@ -31,65 +31,65 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Property(name = "id", nullable = false, length = 32)
-    @PropertyState(propertyName = "id")
+    @Property(name = FIELDS.ID, nullable = false, length = 32)
+    @PropertyState(propertyName = FIELDS.ID)
     private java.lang.String id;
 
-    @Property(name = "name", nullable = false, length = 32)
-    @PropertyState(propertyName = "name")
+    @Property(name = FIELDS.NAME, nullable = false, length = 32)
+    @PropertyState(propertyName = FIELDS.NAME)
     private java.lang.String name;
 
-    @Property(name = "domain", length = 100)
-    @PropertyState(propertyName = "domain")
+    @Property(name = FIELDS.DOMAIN, length = 100)
+    @PropertyState(propertyName = FIELDS.DOMAIN)
     private java.lang.String domain;
 
-    @Property(name = "icon_url", length = 255)
-    @PropertyState(propertyName = "icon_url")
+    @Property(name = FIELDS.ICON_URL, length = 255)
+    @PropertyState(propertyName = FIELDS.ICON_URL)
     private java.lang.String iconUrl;
 
-    @Property(name = "secret_key", nullable = false, length = 32)
-    @PropertyState(propertyName = "secret_key")
+    @Property(name = FIELDS.SECRET_KEY, nullable = false, length = 32)
+    @PropertyState(propertyName = FIELDS.SECRET_KEY)
     private java.lang.String secretKey;
 
-    @Property(name = "description", length = 1000)
-    @PropertyState(propertyName = "description")
+    @Property(name = FIELDS.DESCRIPTION, length = 1000)
+    @PropertyState(propertyName = FIELDS.DESCRIPTION)
     private java.lang.String description;
 
-    @Property(name = "access_token", length = 128)
-    @PropertyState(propertyName = "access_token")
+    @Property(name = FIELDS.ACCESS_TOKEN, length = 128)
+    @PropertyState(propertyName = FIELDS.ACCESS_TOKEN)
     private java.lang.String accessToken;
 
-    @Property(name = "last_access_token", length = 128)
-    @PropertyState(propertyName = "last_access_token")
+    @Property(name = FIELDS.LAST_ACCESS_TOKEN, length = 128)
+    @PropertyState(propertyName = FIELDS.LAST_ACCESS_TOKEN)
     private java.lang.String lastAccessToken;
 
-    @Property(name = "expires_in", length = 11)
+    @Property(name = FIELDS.EXPIRES_IN, length = 11)
     @Default("0")
-    @PropertyState(propertyName = "expires_in")
+    @PropertyState(propertyName = FIELDS.EXPIRES_IN)
     private java.lang.Integer expiresIn;
 
-    @Property(name = "ip_white_list", length = 200)
-    @PropertyState(propertyName = "ip_white_list")
+    @Property(name = FIELDS.IP_WHITE_LIST, length = 200)
+    @PropertyState(propertyName = FIELDS.IP_WHITE_LIST)
     private java.lang.String ipWhiteList;
 
-    @Property(name = "type", unsigned = true, length = 2)
+    @Property(name = FIELDS.TYPE, unsigned = true, length = 2)
     @Default("0")
-    @PropertyState(propertyName = "type")
+    @PropertyState(propertyName = FIELDS.TYPE)
     private java.lang.Integer type;
 
-    @Property(name = "status", unsigned = true, length = 2)
+    @Property(name = FIELDS.STATUS, unsigned = true, length = 2)
     @Default("0")
-    @PropertyState(propertyName = "status")
+    @PropertyState(propertyName = FIELDS.STATUS)
     private java.lang.Integer status;
 
-    @Property(name = "create_time", nullable = false, length = 13)
-    @PropertyState(propertyName = "create_time")
+    @Property(name = FIELDS.CREATE_TIME, nullable = false, length = 13)
+    @PropertyState(propertyName = FIELDS.CREATE_TIME)
     @Readonly
     private java.lang.Long createTime;
 
-    @Property(name = "last_modify_time", length = 13)
+    @Property(name = FIELDS.LAST_MODIFY_TIME, length = 13)
     @Default("0")
-    @PropertyState(propertyName = "last_modify_time")
+    @PropertyState(propertyName = FIELDS.LAST_MODIFY_TIME)
     private java.lang.Long lastModifyTime;
 
     /**

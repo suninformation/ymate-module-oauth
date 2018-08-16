@@ -31,57 +31,57 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Property(name = "id", nullable = false, length = 32)
-    @PropertyState(propertyName = "id")
+    @Property(name = FIELDS.ID, nullable = false, length = 32)
+    @PropertyState(propertyName = FIELDS.ID)
     private java.lang.String id;
 
-    @Property(name = "uid", nullable = false, length = 32)
-    @PropertyState(propertyName = "uid")
+    @Property(name = FIELDS.UID, nullable = false, length = 32)
+    @PropertyState(propertyName = FIELDS.UID)
     private java.lang.String uid;
 
-    @Property(name = "client_id", nullable = false, length = 32)
-    @PropertyState(propertyName = "client_id")
+    @Property(name = FIELDS.CLIENT_ID, nullable = false, length = 32)
+    @PropertyState(propertyName = FIELDS.CLIENT_ID)
     private java.lang.String clientId;
 
-    @Property(name = "is_authorized", unsigned = true, length = 1)
+    @Property(name = FIELDS.IS_AUTHORIZED, unsigned = true, length = 1)
     @Default("0")
-    @PropertyState(propertyName = "is_authorized")
+    @PropertyState(propertyName = FIELDS.IS_AUTHORIZED)
     private java.lang.Integer isAuthorized;
 
-    @Property(name = "access_token", length = 128)
-    @PropertyState(propertyName = "access_token")
+    @Property(name = FIELDS.ACCESS_TOKEN, length = 128)
+    @PropertyState(propertyName = FIELDS.ACCESS_TOKEN)
     private java.lang.String accessToken;
 
-    @Property(name = "last_access_token", length = 128)
-    @PropertyState(propertyName = "last_access_token")
+    @Property(name = FIELDS.LAST_ACCESS_TOKEN, length = 128)
+    @PropertyState(propertyName = FIELDS.LAST_ACCESS_TOKEN)
     private java.lang.String lastAccessToken;
 
-    @Property(name = "refresh_token", length = 128)
-    @PropertyState(propertyName = "refresh_token")
+    @Property(name = FIELDS.REFRESH_TOKEN, length = 128)
+    @PropertyState(propertyName = FIELDS.REFRESH_TOKEN)
     private java.lang.String refreshToken;
 
-    @Property(name = "refresh_count", unsigned = true, length = 1)
+    @Property(name = FIELDS.REFRESH_COUNT, unsigned = true, length = 1)
     @Default("0")
-    @PropertyState(propertyName = "refresh_count")
+    @PropertyState(propertyName = FIELDS.REFRESH_COUNT)
     private java.lang.Integer refreshCount;
 
-    @Property(name = "expires_in", length = 11)
+    @Property(name = FIELDS.EXPIRES_IN, length = 11)
     @Default("0")
-    @PropertyState(propertyName = "expires_in")
+    @PropertyState(propertyName = FIELDS.EXPIRES_IN)
     private java.lang.Integer expiresIn;
 
-    @Property(name = "scope", length = 100)
-    @PropertyState(propertyName = "scope")
+    @Property(name = FIELDS.SCOPE, length = 100)
+    @PropertyState(propertyName = FIELDS.SCOPE)
     private java.lang.String scope;
 
-    @Property(name = "create_time", nullable = false, length = 13)
-    @PropertyState(propertyName = "create_time")
+    @Property(name = FIELDS.CREATE_TIME, nullable = false, length = 13)
+    @PropertyState(propertyName = FIELDS.CREATE_TIME)
     @Readonly
     private java.lang.Long createTime;
 
-    @Property(name = "last_modify_time", length = 13)
+    @Property(name = FIELDS.LAST_MODIFY_TIME, length = 13)
     @Default("0")
-    @PropertyState(propertyName = "last_modify_time")
+    @PropertyState(propertyName = FIELDS.LAST_MODIFY_TIME)
     private java.lang.Long lastModifyTime;
 
     /**
@@ -473,7 +473,7 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
      */
     public class FIELDS {
         public static final String ID = "id";
-        public static final String UID = "uid";
+        public static final String UID = "u_id";
         public static final String CLIENT_ID = "client_id";
         public static final String IS_AUTHORIZED = "is_authorized";
         public static final String ACCESS_TOKEN = "access_token";

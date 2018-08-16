@@ -26,7 +26,7 @@ CREATE TABLE `ym_oauth_client` (
 DROP TABLE IF EXISTS `ym_oauth_user`;
 CREATE TABLE `ym_oauth_user` (
   `id` varchar(32) NOT NULL COMMENT '用户授权唯一标识',
-  `uid` varchar(32) NOT NULL COMMENT '用户唯一标识',
+  `u_id` varchar(32) NOT NULL COMMENT '用户唯一标识',
   `client_id` varchar(32) NOT NULL COMMENT '客户端唯一标识',
   `is_authorized` smallint(1) unsigned DEFAULT '0' COMMENT '用户是否已授权',
   `access_token` varchar(128) DEFAULT NULL COMMENT '用户授权访问令牌',

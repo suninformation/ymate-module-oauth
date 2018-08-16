@@ -5,7 +5,7 @@
 > - 支持客户端模式 `grant_type=client_credentials`；
 > - 支持授权码模式 `grant_type=authorization_code`；
 > - 支持密码模式 `grant_type=password`；
-> - 支持简单模式 `response_type=token`；
+> - 支持简化模式 `response_type=token`；
 > - 支持自定义`scope`权限，默认支持：`snsapi_base`和`snsapi_userinfo`；
 > - 支持令牌更新：`grant_type=refresh_token`；
 > - 支持令牌有效性验证；
@@ -112,7 +112,7 @@
 
             code=f32ab01222936356e5a8352b9beeacc3&client_id=default&client_secret=7890123&grant_type=authorization_code&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Foauth2%2Fsns%2Fredirect
 
-- 简间单模式：
+- 简化模式：
 
     - 以GET方式请求URL地址，成功则重定向并携带`access_token`令牌：
 
