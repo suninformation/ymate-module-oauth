@@ -25,7 +25,7 @@ import net.ymate.platform.persistence.jdbc.support.BaseEntity;
  * @author 刘镇 (suninformation@163.com) on 2018/02/11 上午 01:52:32
  * @version 1.0
  */
-@Entity("oauth_client")
+@Entity(OAuthClient.TABLE_NAME)
 public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
 
     private static final long serialVersionUID = 1L;
