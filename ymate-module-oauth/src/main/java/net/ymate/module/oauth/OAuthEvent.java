@@ -17,13 +17,11 @@ package net.ymate.module.oauth;
 
 import net.ymate.platform.core.event.EventContext;
 import net.ymate.platform.core.event.IEvent;
-import net.ymate.platform.core.event.annotation.Event;
 
 /**
  * @author 刘镇 (suninformation@163.com) on 2018/2/15 上午2:47
  * @version 1.0
  */
-@Event
 public class OAuthEvent extends EventContext<IOAuth, OAuthEvent.EVENT> implements IEvent {
 
     public enum EVENT {
