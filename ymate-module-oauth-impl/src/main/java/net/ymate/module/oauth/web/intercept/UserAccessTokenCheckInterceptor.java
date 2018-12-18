@@ -51,6 +51,9 @@ public class UserAccessTokenCheckInterceptor extends AbstractInterceptor {
                     if (_tokenBean != null) {
                         IOAuthScopeProcessor _processor = OAuth.get().getScopeProcessor(_scope.value());
                         if (_processor != null) {
+                            if (!_processor.isInited()) {
+                                _processor.init(OAuth.get());
+                            }
                             _response = _processor.process(_request, _tokenBean);
                             //
                             context.getOwner().getEvents().fireEvent(new OAuthEvent(OAuth.get(), OAuthEvent.EVENT.SCOPE_PROCESSOR).setEventSource(_scope.value()).addParamExtend(OAuthClientUserBean.class.getName(), _tokenBean));

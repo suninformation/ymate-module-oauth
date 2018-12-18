@@ -31,7 +31,7 @@ public @interface OAuthScope {
     /**
      * @return 需要用户授权的作用域名称
      */
-    String value() default "";
+    String value();
 
     /**
      * @return 是否自动调用处理器

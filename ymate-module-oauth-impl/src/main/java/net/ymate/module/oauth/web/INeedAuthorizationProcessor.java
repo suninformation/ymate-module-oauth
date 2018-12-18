@@ -26,5 +26,13 @@ import net.ymate.platform.webmvc.view.IView;
  */
 public interface INeedAuthorizationProcessor {
 
+    String CLIENT_TITLE = "client_title";
+
+    String CLIENT_ICON = "client_icon";
+
+    String CLIENT_DOMAIN = "client_domain";
+
+    String CLIENT_SCOPES = "scopes";
+
     IView process(NeedAuthorizationException e) throws Exception;
 }

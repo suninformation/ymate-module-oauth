@@ -28,11 +28,14 @@ public abstract class AbstractScopeProcessor implements IOAuthScopeProcessor {
 
     private IOAuth owner;
 
+    private boolean inited;
+
     private Map<String, Object> params = new HashMap<String, Object>();
 
     @Override
     public void init(IOAuth owner) throws Exception {
         this.owner = owner;
+        this.inited = true;
     }
 
     public IOAuth getOwner() {
@@ -41,7 +44,11 @@ public abstract class AbstractScopeProcessor implements IOAuthScopeProcessor {
 
     @Override
     public void destroy() throws Exception {
-        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isInited() {
+        return inited;
     }
 
     @Override

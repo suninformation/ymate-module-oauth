@@ -50,7 +50,7 @@ public class OAuth implements IModule, IOAuth {
 
     private static final Log _LOG = LogFactory.getLog(OAuth.class);
 
-    public static final Version VERSION = new Version(1, 0, 0, OAuth.class.getPackage().getImplementationVersion(), Version.VersionType.Alphal);
+    public static final Version VERSION = new Version(1, 0, 0, OAuth.class.getPackage().getImplementationVersion(), Version.VersionType.Alpha);
 
     private static volatile IOAuth __instance;
 
@@ -87,7 +87,7 @@ public class OAuth implements IModule, IOAuth {
             __owner = owner;
             __owner.getEvents().registerEvent(OAuthEvent.class);
             __owner.registerHandler(OAuthScope.class, new OAuthScopeHandler(this));
-            __moduleCfg = new DefaultModuleCfg(owner);
+            __moduleCfg = new DefaultOAuthModuleCfg(owner);
             //
             if (__moduleCfg.getStorageAdapter() != null) {
                 __moduleCfg.getStorageAdapter().init(this);
@@ -103,15 +103,13 @@ public class OAuth implements IModule, IOAuth {
     }
 
     @Override
-    public void registerScopeProcessor(Class<? extends IOAuthScopeProcessor> targetClass) throws Exception {
-        IOAuthScopeProcessor _scopeProc = targetClass.newInstance();
-        if (StringUtils.isNotBlank(_scopeProc.getName())) {
-            _scopeProc.init(this);
-            __scopeProcessors.put(_scopeProc.getName(), targetClass);
-            __owner.registerBean(BeanMeta.create(_scopeProc, targetClass));
+    public void registerScopeProcessor(String scopeName, Class<? extends IOAuthScopeProcessor> targetClass) throws Exception {
+        if (StringUtils.isNotBlank(scopeName) && targetClass != null) {
+            __scopeProcessors.put(scopeName, targetClass);
+            __owner.registerBean(BeanMeta.create(targetClass, true));
             //
             if (__owner.getConfig().isDevelopMode()) {
-                _LOG.debug("--> Registered scope processor [" + _scopeProc.getName() + "] - " + targetClass.getName());
+                _LOG.debug("--> Registered scope processor [" + scopeName + "] - " + targetClass.getName());
             }
         }
     }

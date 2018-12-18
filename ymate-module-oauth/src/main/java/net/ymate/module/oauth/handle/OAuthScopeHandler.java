@@ -17,6 +17,7 @@ package net.ymate.module.oauth.handle;
 
 import net.ymate.module.oauth.IOAuth;
 import net.ymate.module.oauth.IOAuthScopeProcessor;
+import net.ymate.module.oauth.annotation.OAuthScope;
 import net.ymate.platform.core.beans.IBeanHandler;
 import net.ymate.platform.core.util.ClassUtils;
 
@@ -37,7 +38,8 @@ public class OAuthScopeHandler implements IBeanHandler {
     @SuppressWarnings("unchecked")
     public Object handle(Class<?> targetClass) throws Exception {
         if (ClassUtils.isInterfaceOf(targetClass, IOAuthScopeProcessor.class)) {
-            __owner.registerScopeProcessor((Class<? extends IOAuthScopeProcessor>) targetClass);
+            OAuthScope authScope = targetClass.getAnnotation(OAuthScope.class);
+            __owner.registerScopeProcessor(authScope.value(), (Class<? extends IOAuthScopeProcessor>) targetClass);
         }
         return null;
     }

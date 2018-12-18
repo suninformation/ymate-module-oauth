@@ -17,21 +17,20 @@ package net.ymate.module.oauth.impl;
 
 import net.ymate.module.oauth.*;
 import net.ymate.platform.core.YMP;
-import net.ymate.platform.core.lang.BlurObject;
-import net.ymate.platform.core.util.ClassUtils;
+import net.ymate.platform.core.support.IConfigReader;
+import net.ymate.platform.core.support.impl.MapSafeConfigReader;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
  * @author 刘镇 (suninformation@163.com) on 2017/02/26 上午 02:08
  * @version 1.0
  */
-public class DefaultModuleCfg implements IOAuthModuleCfg {
+public class DefaultOAuthModuleCfg implements IOAuthModuleCfg {
 
     private int __accessTokenExpireIn;
 
@@ -51,33 +50,33 @@ public class DefaultModuleCfg implements IOAuthModuleCfg {
 
     private IOAuthErrorAdapter __errorAdapter;
 
-    public DefaultModuleCfg(YMP owner) {
-        Map<String, String> _moduleCfgs = owner.getConfig().getModuleConfigs(IOAuth.MODULE_NAME);
+    public DefaultOAuthModuleCfg(YMP owner) {
+        IConfigReader _moduleCfg = MapSafeConfigReader.bind(owner.getConfig().getModuleConfigs(IOAuth.MODULE_NAME));
         //
-        __accessTokenExpireIn = BlurObject.bind(_moduleCfgs.get("access_token_expire_in")).toIntValue();
+        __accessTokenExpireIn = _moduleCfg.getInt(ACCESS_TOKEN_EXPIRE_IN);
         if (__accessTokenExpireIn <= 0) {
             __accessTokenExpireIn = 7200;
         }
         //
-        __refreshCountMax = BlurObject.bind(_moduleCfgs.get("refresh_count_max")).toIntValue();
+        __refreshCountMax = _moduleCfg.getInt(REFRESH_COUNT_MAX);
         if (__refreshCountMax < 0) {
             __refreshCountMax = 0;
         }
         //
-        __refreshTokenExpireIn = BlurObject.bind(_moduleCfgs.get("refresh_token_expire_in")).toIntValue();
+        __refreshTokenExpireIn = _moduleCfg.getInt(REFRESH_TOKEN_EXPIRE_IN);
         if (__refreshTokenExpireIn <= 0) {
             __refreshTokenExpireIn = 30;
         }
         //
-        __authorizationCodeExpireIn = BlurObject.bind(_moduleCfgs.get("authorization_code_expire_in")).toIntValue();
+        __authorizationCodeExpireIn = _moduleCfg.getInt(AUTHORIZATION_CODE_EXPIRE_IN);
         if (__authorizationCodeExpireIn <= 0) {
             __authorizationCodeExpireIn = 5;
         }
         //
-        __cacheNamePrefix = StringUtils.trimToEmpty(_moduleCfgs.get("cache_name_prefix"));
+        __cacheNamePrefix = StringUtils.trimToEmpty(_moduleCfg.getString(CACHE_NAME_PREFIX));
         //
         __allowGrantTypes = new HashSet<GrantType>();
-        String _grantTypeStr = StringUtils.defaultIfBlank(_moduleCfgs.get("allow_grant_types"), "none");
+        String _grantTypeStr = _moduleCfg.getString(ALLOW_GRANT_TYPES, "none");
         if (!StringUtils.containsIgnoreCase(_grantTypeStr, "none")) {
             String[] _types = StringUtils.split(_grantTypeStr, "|");
             if (ArrayUtils.isNotEmpty(_types)) {
@@ -92,15 +91,15 @@ public class DefaultModuleCfg implements IOAuthModuleCfg {
         }
         //
         if (!__allowGrantTypes.isEmpty()) {
-            __tokenGenerator = ClassUtils.impl(_moduleCfgs.get("token_generator_class"), IOAuthTokenGenerator.class, getClass());
+            __tokenGenerator = _moduleCfg.getClassImpl(TOKEN_GENERATOR_CLASS, IOAuthTokenGenerator.class);
             if (__tokenGenerator == null) {
                 __tokenGenerator = new DefaultTokenGenerator();
             }
             //
-            __storageAdapter = ClassUtils.impl(_moduleCfgs.get("storage_adapter_class"), IOAuthStorageAdapter.class, getClass());
+            __storageAdapter = _moduleCfg.getClassImpl(STORAGE_ADAPTER_CLASS, IOAuthStorageAdapter.class);
         }
         //
-        __errorAdapter = ClassUtils.impl(_moduleCfgs.get("error_adapter_class"), IOAuthErrorAdapter.class, getClass());
+        __errorAdapter = _moduleCfg.getClassImpl(ERROR_ADAPTER_CLASS, IOAuthErrorAdapter.class);
         if (__errorAdapter == null) {
             __errorAdapter = new DefaultErrorAdapter();
         }

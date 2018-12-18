@@ -15,14 +15,15 @@
 
     <modules>
         <module>ymate-module-oauth</module>
+        <module>ymate-module-oauth-client</module>
         <module>ymate-module-oauth-impl</module>
         <module>ymate-module-oauth-model</module>
     </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <ymate.platform.version>2.0.5</ymate.platform.version>
-        <ymate.framework.version>2.0.5</ymate.framework.version>
+        <ymate.platform.version>2.0.6</ymate.platform.version>
+        <ymate.framework.version>2.0.6</ymate.framework.version>
     </properties>
 
     <developers>
@@ -168,6 +169,11 @@
                 <groupId>net.ymate.platform</groupId>
                 <artifactId>ymate-platform-webmvc</artifactId>
                 <version>${ymate.platform.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.ymate.framework</groupId>
+                <artifactId>ymate-framework-commons</artifactId>
+                <version>${ymate.framework.version}</version>
             </dependency>
             <dependency>
                 <groupId>net.ymate.framework</groupId>

@@ -29,9 +29,9 @@ public class DefaultNeedAuthorizationProcessor implements INeedAuthorizationProc
     @Override
     public IView process(NeedAuthorizationException e) throws Exception {
         return View.jspView()
-                .addAttribute("client_title", e.getClientBean().getName())
-                .addAttribute("client_icon", e.getClientBean().getIconUrl())
-                .addAttribute("client_domain", e.getClientBean().getDomain())
-                .addAttribute("scopes", e.getScopes());
+                .addAttribute(CLIENT_TITLE, e.getClientBean().getName())
+                .addAttribute(CLIENT_ICON, e.getClientBean().getIconUrl())
+                .addAttribute(CLIENT_DOMAIN, e.getClientBean().getDomain())
+                .addAttribute(CLIENT_SCOPES, e.getScopes());
     }
 }

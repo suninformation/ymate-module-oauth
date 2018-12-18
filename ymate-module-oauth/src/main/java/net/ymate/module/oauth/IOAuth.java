@@ -48,10 +48,11 @@ public interface IOAuth {
     /**
      * 注册OAuth授权作用域处理器
      *
+     * @param scopeName   需要用户授权的作用域名称
      * @param targetClass 目标类型
      * @throws Exception 可能产生的任何异常
      */
-    void registerScopeProcessor(Class<? extends IOAuthScopeProcessor> targetClass) throws Exception;
+    void registerScopeProcessor(String scopeName, Class<? extends IOAuthScopeProcessor> targetClass) throws Exception;
 
     /**
      * @param name OAuth授权作用域处理器名称

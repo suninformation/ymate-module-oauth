@@ -30,9 +30,9 @@ import javax.servlet.http.HttpServletRequest;
 public interface IOAuthScopeProcessor extends IInitializable<IOAuth> {
 
     /**
-     * @return 返回OAuth授权作用域名称
+     * @return 是否已初始化
      */
-    String getName();
+    boolean isInited();
 
     /**
      * @param request   HttpServletRequest请求对象

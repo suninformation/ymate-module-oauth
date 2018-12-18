@@ -25,6 +25,24 @@ import java.util.Set;
  */
 public interface IOAuthModuleCfg {
 
+    String ACCESS_TOKEN_EXPIRE_IN = "access_token_expire_in";
+
+    String REFRESH_COUNT_MAX = "refresh_count_max";
+
+    String REFRESH_TOKEN_EXPIRE_IN = "refresh_token_expire_in";
+
+    String AUTHORIZATION_CODE_EXPIRE_IN = "authorization_code_expire_in";
+
+    String CACHE_NAME_PREFIX = "cache_name_prefix";
+
+    String ALLOW_GRANT_TYPES = "allow_grant_types";
+
+    String TOKEN_GENERATOR_CLASS = "token_generator_class";
+
+    String STORAGE_ADAPTER_CLASS = "storage_adapter_class";
+
+    String ERROR_ADAPTER_CLASS = "error_adapter_class";
+
     /**
      * @return 返回AccessToken访问凭证超时时间, 单位(秒), 默认值: 7200(两小时)
      */

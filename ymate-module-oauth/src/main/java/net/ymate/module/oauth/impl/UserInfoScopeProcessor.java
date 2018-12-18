@@ -32,13 +32,8 @@ import javax.servlet.http.HttpServletResponse;
  * @author 刘镇 (suninformation@163.com) on 2018/1/18 上午11:05
  * @version 1.0
  */
-@OAuthScope
+@OAuthScope(IOAuth.Const.SCOPE_SNSAPI_USERINFO)
 public class UserInfoScopeProcessor extends AbstractScopeProcessor {
-
-    @Override
-    public String getName() {
-        return IOAuth.Const.SCOPE_SNSAPI_USERINFO;
-    }
 
     @Override
     public OAuthResponse process(HttpServletRequest request, OAuthTokenBean tokenBean) throws Exception {
