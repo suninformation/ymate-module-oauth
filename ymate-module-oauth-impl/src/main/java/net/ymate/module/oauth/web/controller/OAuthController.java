@@ -84,13 +84,10 @@ public class OAuthController {
             HttpServletRequest _request = WebContext.getRequest();
             ResponseType _responseType = ResponseType.valueOf(StringUtils.upperCase(StringUtils.trimToEmpty(_request.getParameter(org.apache.oltu.oauth2.common.OAuth.OAUTH_RESPONSE_TYPE))));
             GrantType _grantType;
-            switch (_responseType) {
-                case CODE:
-                    _grantType = GrantType.AUTHORIZATION_CODE;
-                    break;
-                default:
-                    _grantType = GrantType.IMPLICIT;
-                    break;
+            if (ResponseType.CODE.equals(_responseType)) {
+                _grantType = GrantType.AUTHORIZATION_CODE;
+            } else {
+                _grantType = GrantType.IMPLICIT;
             }
             if (OAuth.get().getModuleCfg().getAllowGrantTypes().contains(_grantType)) {
                 IOAuthGrantProcessor _processor = new ImplicitGrantProcessor(OAuth.get(), _responseType)

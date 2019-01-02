@@ -116,12 +116,10 @@ public class DefaultOAuthStorageAdapter implements IOAuthStorageAdapter {
     protected void __putCacheElement(CacheDataType dataType, OAuthTokenBean tokenBean) {
         if (dataType != null && tokenBean != null) {
             String _targetId;
-            switch (dataType) {
-                case CLIENT:
-                    _targetId = tokenBean.getClientId();
-                    break;
-                default:
-                    _targetId = ((OAuthClientUserBean) tokenBean).getOpenId();
+            if (CacheDataType.CLIENT.equals(dataType)) {
+                _targetId = tokenBean.getClientId();
+            } else {
+                _targetId = ((OAuthClientUserBean) tokenBean).getOpenId();
             }
             if (StringUtils.isNotBlank(_targetId)) {
                 String _cacheName = dataType.name().concat(_targetId);

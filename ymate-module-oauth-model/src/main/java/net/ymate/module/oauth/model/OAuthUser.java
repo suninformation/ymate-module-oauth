@@ -90,14 +90,6 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
     public OAuthUser() {
     }
 
-    /**
-     * 构造器
-     *
-     * @param id
-     * @param uid
-     * @param clientId
-     * @param createTime
-     */
     public OAuthUser(java.lang.String id, java.lang.String uid, java.lang.String clientId, java.lang.Long createTime) {
         this.id = id;
         this.uid = uid;
@@ -105,22 +97,6 @@ public class OAuthUser extends BaseEntity<OAuthUser, java.lang.String> {
         this.createTime = createTime;
     }
 
-    /**
-     * 构造器
-     *
-     * @param id
-     * @param uid
-     * @param clientId
-     * @param isAuthorized
-     * @param accessToken
-     * @param lastAccessToken
-     * @param refreshToken
-     * @param refreshCount
-     * @param expiresIn
-     * @param scope
-     * @param createTime
-     * @param lastModifyTime
-     */
     public OAuthUser(java.lang.String id, java.lang.String uid, java.lang.String clientId, java.lang.Integer isAuthorized, java.lang.String accessToken, java.lang.String lastAccessToken, java.lang.String refreshToken, java.lang.Integer refreshCount, java.lang.Integer expiresIn, java.lang.String scope, java.lang.Long createTime, java.lang.Long lastModifyTime) {
         this.id = id;
         this.uid = uid;

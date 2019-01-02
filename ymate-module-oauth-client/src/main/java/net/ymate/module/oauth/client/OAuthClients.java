@@ -34,7 +34,7 @@ public class OAuthClients implements IModule, IOAuthClients {
 
     private static final Log _LOG = LogFactory.getLog(OAuthClients.class);
 
-    public static final Version VERSION = new Version(1, 0, 0, OAuthClients.class.getPackage().getImplementationVersion(), Version.VersionType.Alpha);
+    public static final Version VERSION = new Version(1, 0, 0, OAuthClients.class.getPackage().getImplementationVersion(), Version.VersionType.Release);
 
     private static volatile IOAuthClients __instance;
 

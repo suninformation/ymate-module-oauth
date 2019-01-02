@@ -50,7 +50,7 @@ public class OAuth implements IModule, IOAuth {
 
     private static final Log _LOG = LogFactory.getLog(OAuth.class);
 
-    public static final Version VERSION = new Version(1, 0, 0, OAuth.class.getPackage().getImplementationVersion(), Version.VersionType.Alpha);
+    public static final Version VERSION = new Version(1, 0, 0, OAuth.class.getPackage().getImplementationVersion(), Version.VersionType.Release);
 
     private static volatile IOAuth __instance;
 

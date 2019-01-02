@@ -98,14 +98,6 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
     public OAuthClient() {
     }
 
-    /**
-     * 构造器
-     *
-     * @param id
-     * @param name
-     * @param secretKey
-     * @param createTime
-     */
     public OAuthClient(java.lang.String id, java.lang.String name, java.lang.String secretKey, java.lang.Long createTime) {
         this.id = id;
         this.name = name;
@@ -113,24 +105,6 @@ public class OAuthClient extends BaseEntity<OAuthClient, java.lang.String> {
         this.createTime = createTime;
     }
 
-    /**
-     * 构造器
-     *
-     * @param id
-     * @param name
-     * @param domain
-     * @param iconUrl
-     * @param secretKey
-     * @param description
-     * @param accessToken
-     * @param lastAccessToken
-     * @param expiresIn
-     * @param ipWhiteList
-     * @param type
-     * @param status
-     * @param createTime
-     * @param lastModifyTime
-     */
     public OAuthClient(java.lang.String id, java.lang.String name, java.lang.String domain, java.lang.String iconUrl, java.lang.String secretKey, java.lang.String description, java.lang.String accessToken, java.lang.String lastAccessToken, java.lang.Integer expiresIn, java.lang.String ipWhiteList, java.lang.Integer type, java.lang.Integer status, java.lang.Long createTime, java.lang.Long lastModifyTime) {
         this.id = id;
         this.name = name;
