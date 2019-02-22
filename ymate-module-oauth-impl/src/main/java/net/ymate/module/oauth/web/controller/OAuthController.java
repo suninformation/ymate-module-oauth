@@ -63,7 +63,12 @@ public class OAuthController {
      */
     @RequestMapping(value = "/token", method = Type.HttpMethod.POST)
     public IView token() throws Exception {
-        OAuthResponse _response = OAuth.get().getGrantProcessor(GrantType.CLIENT_CREDENTIALS).process(WebContext.getRequest());
+        OAuthResponse _response;
+        if (OAuth.get().getModuleCfg().getAllowGrantTypes().contains(GrantType.CLIENT_CREDENTIALS)) {
+            _response = OAuth.get().getGrantProcessor(GrantType.CLIENT_CREDENTIALS).process(WebContext.getRequest());
+        } else {
+            _response = IOAuthGrantProcessor.UNSUPPORTED_GRANT_TYPE.process(WebContext.getRequest());
+        }
         return new HttpStatusView(_response.getResponseStatus(), false).writeBody(_response.getBody());
     }
 
@@ -126,13 +131,17 @@ public class OAuthController {
         try {
             HttpServletRequest _request = WebContext.getRequest();
             GrantType _grantType = GrantType.valueOf(StringUtils.upperCase(StringUtils.trimToEmpty(_request.getParameter(org.apache.oltu.oauth2.common.OAuth.OAUTH_GRANT_TYPE))));
-            switch (_grantType) {
-                case AUTHORIZATION_CODE:
-                case PASSWORD:
-                    _response = OAuth.get().getGrantProcessor(_grantType).process(_request);
-                    break;
-                default:
-                    _response = IOAuthGrantProcessor.UNSUPPORTED_GRANT_TYPE.process(WebContext.getRequest());
+            if (OAuth.get().getModuleCfg().getAllowGrantTypes().contains(_grantType)) {
+                switch (_grantType) {
+                    case AUTHORIZATION_CODE:
+                    case PASSWORD:
+                        _response = OAuth.get().getGrantProcessor(_grantType).process(_request);
+                        break;
+                    default:
+                        _response = IOAuthGrantProcessor.UNSUPPORTED_GRANT_TYPE.process(WebContext.getRequest());
+                }
+            } else {
+                _response = IOAuthGrantProcessor.UNSUPPORTED_GRANT_TYPE.process(WebContext.getRequest());
             }
         } catch (OAuthProblemException e) {
             _response = OAuth.get().getModuleCfg().getErrorAdapter().onError(e);
@@ -148,7 +157,12 @@ public class OAuthController {
      */
     @RequestMapping(value = "/sns/refresh_token", method = Type.HttpMethod.POST)
     public IView refreshToken() throws Exception {
-        OAuthResponse _response = OAuth.get().getGrantProcessor(GrantType.REFRESH_TOKEN).process(WebContext.getRequest());
+        OAuthResponse _response;
+        if (OAuth.get().getModuleCfg().getAllowGrantTypes().contains(GrantType.REFRESH_TOKEN)) {
+            _response = OAuth.get().getGrantProcessor(GrantType.REFRESH_TOKEN).process(WebContext.getRequest());
+        } else {
+            _response = IOAuthGrantProcessor.UNSUPPORTED_GRANT_TYPE.process(WebContext.getRequest());
+        }
         return new HttpStatusView(_response.getResponseStatus(), false).writeBody(_response.getBody());
     }
 
