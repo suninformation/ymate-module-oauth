@@ -53,6 +53,9 @@ public class DefaultErrorAdapter implements IOAuthErrorAdapter {
             case INVALID_USER:
                 _response = OAuthResponseUtils.badRequest(IOAuth.Const.INVALID_USER);
                 break;
+            case INVALID_OPEN_ID:
+                _response = OAuthResponseUtils.badRequest(IOAuth.Const.INVALID_OPEN_ID);
+                break;
             case INVALID_REQUEST:
                 _response = OAuthResponseUtils.badRequest(OAuthError.TokenResponse.INVALID_REQUEST);
                 break;

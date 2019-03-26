@@ -15,7 +15,7 @@
  */
 package net.ymate.module.oauth;
 
-import net.ymate.module.oauth.base.OAuthTokenBean;
+import net.ymate.module.oauth.base.OAuthClientUserBean;
 import net.ymate.platform.core.support.IInitializable;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 
@@ -40,7 +40,7 @@ public interface IOAuthScopeProcessor extends IInitializable<IOAuth> {
      * @return 返回执行结果对象
      * @throws Exception 可能产生的任何异常
      */
-    OAuthResponse process(HttpServletRequest request, OAuthTokenBean tokenBean) throws Exception;
+    OAuthResponse process(HttpServletRequest request, OAuthClientUserBean tokenBean) throws Exception;
 
     /**
      * @param key   参数键名

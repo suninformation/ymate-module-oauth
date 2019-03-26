@@ -19,7 +19,7 @@ import net.ymate.module.oauth.AbstractScopeProcessor;
 import net.ymate.module.oauth.IOAuth;
 import net.ymate.module.oauth.OAuth;
 import net.ymate.module.oauth.annotation.OAuthScope;
-import net.ymate.module.oauth.base.OAuthTokenBean;
+import net.ymate.module.oauth.base.OAuthClientUserBean;
 import net.ymate.module.oauth.base.OAuthUserInfoBean;
 import net.ymate.module.oauth.support.OAuthResponseUtils;
 import org.apache.commons.lang.StringUtils;
@@ -36,10 +36,10 @@ import javax.servlet.http.HttpServletResponse;
 public class UserInfoScopeProcessor extends AbstractScopeProcessor {
 
     @Override
-    public OAuthResponse process(HttpServletRequest request, OAuthTokenBean tokenBean) throws Exception {
+    public OAuthResponse process(HttpServletRequest request, OAuthClientUserBean tokenBean) throws Exception {
         OAuthResponse _response = null;
         String _openId = request.getParameter(IOAuth.Const.OPEN_ID);
-        if (StringUtils.isNotBlank(_openId)) {
+        if (StringUtils.isNotBlank(_openId) && StringUtils.equalsIgnoreCase(tokenBean.getOpenId(), _openId)) {
             OAuthUserInfoBean _infoBean = getOwner().getModuleCfg().getStorageAdapter().findUserInfo(tokenBean.getClientId(), _openId);
             if (_infoBean != null) {
                 OAuthResponse.OAuthResponseBuilder _builder = new OAuthResponse.OAuthResponseBuilder(HttpServletResponse.SC_OK)
@@ -48,7 +48,7 @@ public class UserInfoScopeProcessor extends AbstractScopeProcessor {
             }
         }
         if (_response == null) {
-            _response = OAuth.get().getModuleCfg().getErrorAdapter().onError(IOAuth.ErrorType.INVALID_REQUEST);
+            _response = OAuth.get().getModuleCfg().getErrorAdapter().onError(IOAuth.ErrorType.INVALID_OPEN_ID);
         }
         return _response;
     }

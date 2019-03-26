@@ -106,6 +106,8 @@ public interface IOAuth {
 
         public static final String INVALID_USER = "invalid_user";
 
+        public static final String INVALID_OPEN_ID = "invalid_open_id";
+
         public static final String INVALID_REDIRECT_URI = "invalid_redirect_uri";
 
         public static final String REDIRECT_URI_MISMATCH = "redirect_uri_mismatch";
@@ -123,6 +125,7 @@ public interface IOAuth {
         INVALID_SCOPE,
         INSUFFICIENT_SCOPE,
         INVALID_USER,
+        INVALID_OPEN_ID,
         INVALID_REDIRECT_URI,
         UNAUTHORIZED_CLIENT,
         UNSUPPORTED_GRANT_TYPE,
